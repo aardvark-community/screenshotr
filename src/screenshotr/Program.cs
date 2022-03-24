@@ -2,35 +2,9 @@
  * Screenshotr CLI
  */
 
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Png;
-using SixLabors.ImageSharp.PixelFormats;
-using System.Configuration;
 using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.SignalR.Client;
-using System.Collections.Immutable;
+using SixLabors.ImageSharp;
 
-
-//var foo = Custom.Entry.Create("foo", new Foo(Title: "My Title", Custom: new Bla(2022, 03, 10)));
-//var j = JsonSerializer.Serialize(foo, Utils.JsonOptions);
-//var foo_ = JsonSerializer.Deserialize<Custom.Entry>(j, Utils.JsonOptions);
-//var x1 = foo_.GetAs<Foo>();
-
-//var img0 = Image.Load<Rgba32>(File.ReadAllBytes(@"T:\a.jpg"));
-//var img1 = Image.Load<Rgba32>(File.ReadAllBytes(@"T:\b.jpg"));
-//var thumb0 = Repository.Resize(img0, new Size(256, 256));
-//var thumb1 = Repository.Resize(img1, new Size(256, 256));
-//await thumb0.SaveAsPngAsync(@"T:\a.thumb.png", new PngEncoder() { ColorType = PngColorType.RgbWithAlpha });
-//await thumb1.SaveAsPngAsync(@"T:\b.thumb.png", new PngEncoder() { ColorType = PngColorType.RgbWithAlpha });
-//return;
-
-//var uri0 = new Uri("C:/Data/Development");
-//var uri1 = new Uri("https://localhost:5001/");
-//var foo = Image.Identify(@"T:\IMG_2797.CR2");
-
-//var repo = Repository.Init(@"T:/screenshotr/testrepo");
-//var tags = repo.Entries.Values.SelectMany(e => e.Tags).GroupBy(x => x).Select(g => (g.Key, g.Count())).ToArray();
-//return;
 
 IConfiguration Configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
@@ -163,8 +137,8 @@ async Task Import(string[] args)
     if (filesAndFolders.Count == 0) { Usage(); return; }
 
     IScreenshotrApi repo = endpoint.IsFile
-        ? ScreenshotrRepositoryClient.Create(endpoint.AbsolutePath)
-        : await ScreenshotrHttpClient.Create(endpoint.AbsoluteUri)
+        ? ScreenshotrRepositoryClient.Connect(endpoint.AbsolutePath)
+        : await ScreenshotrHttpClient.Connect(endpoint.AbsoluteUri)
         ;
 
     var countFilenames = 0;

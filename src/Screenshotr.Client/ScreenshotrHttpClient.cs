@@ -19,7 +19,7 @@ public class ScreenshotrHttpClient : IScreenshotrApi
         _httpClient = new HttpClient() { BaseAddress = new Uri(endpoint) };
     }
 
-    public static async Task<ScreenshotrHttpClient> Create(string endpoint)
+    public static async Task<ScreenshotrHttpClient> Connect(string endpoint)
     {
         var client = new ScreenshotrHttpClient(endpoint);
 

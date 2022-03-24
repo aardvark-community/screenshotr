@@ -11,7 +11,7 @@ public class ScreenshotrRepositoryClient : IScreenshotrApi
         _repo = repository;
     }
 
-    public static ScreenshotrRepositoryClient Create(string baseDirectory)
+    public static ScreenshotrRepositoryClient Connect(string baseDirectory)
     {
         var repo = Repository.Init(baseDirectory);
         return new ScreenshotrRepositoryClient(repo);

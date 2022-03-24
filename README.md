@@ -2,6 +2,25 @@
 [![Windows](https://github.com/aardvark-community/screenshotr/actions/workflows/windows.yml/badge.svg)](https://github.com/aardvark-community/screenshotr/actions/workflows/windows.yml)
 [![Linux](https://github.com/aardvark-community/screenshotr/actions/workflows/linux.yml/badge.svg)](https://github.com/aardvark-community/screenshotr/actions/workflows/linux.yml)
 [![MacOS](https://github.com/aardvark-community/screenshotr/actions/workflows/mac.yml/badge.svg)](https://github.com/aardvark-community/screenshotr/actions/workflows/mac.yml)
+
+
+# Quickstart
+
+Use the appropriate version of `run` and `screenshotr` for your OS. 
+- e.g. `./run.sh` and `./screenshotr.sh` for Linux
+- or `run.cmd` and `screenshotr.cmd` for Windows
+
+```bash
+git clone https://github.com/stefanmaierhofer/screenshotr.git
+cd screenshotr
+run
+```
+Open https://localhost:5021/ in a your browser.
+
+```bash
+screenshotr import -e https://localhost:5021 --addRandomLabels ./directory/with/images
+```
+
 # Server
 
 - `git clone https://github.com/stefanmaierhofer/screenshotr.git`
@@ -15,13 +34,16 @@
 ```csharp
 using Screenshotr;
 
-var client = await ScreenshotrHttpClient.Create(endpoint.AbsoluteUri);
-
 var filename = "example.jpg";
-var buffer = File.ReadAllBytes(filename);
-var tags = new [] { "foo", "bar" };
-var timestamp = new FileInfo(filename).LastWriteTime;
-var foo = await client.ImportScreenshot(buffer, tags, timestamp);
+var endpoint = "https://localhost:5021";
+
+var client = await ScreenshotrHttpClient.Connect(endpoint);
+
+await client.ImportScreenshot(
+    buffer: File.ReadAllBytes(filename),
+    tags: new[] { "foo", "bar" },
+    timestamp: new FileInfo(filename).LastWriteTime
+    );
 ```
 
 # Command Line Tool

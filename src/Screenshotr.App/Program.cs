@@ -1,11 +1,8 @@
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.FileProviders;
 using Screenshotr;
-using System.Threading.Tasks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,7 +10,7 @@ Console.WriteLine($"[ScreenshotrService] init ...");
 var screenshotrEndpoint = builder.Configuration["Screenshotr:Data"];
 screenshotrEndpoint = Path.GetFullPath(screenshotrEndpoint);
 Console.WriteLine($"[ScreenshotrService]     service endpoint {screenshotrEndpoint}");
-var screenshotrService = ScreenshotrRepositoryClient.Create(screenshotrEndpoint);
+var screenshotrService = ScreenshotrRepositoryClient.Connect(screenshotrEndpoint);
 var status = await screenshotrService.GetStatus(new());
 Console.WriteLine($"[ScreenshotrService]     version {status.Version}");
 Console.WriteLine($"[ScreenshotrService]     base directory is {screenshotrEndpoint}");

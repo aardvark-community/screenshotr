@@ -8,8 +8,8 @@ public static class ScreenshotrService
     public static async Task<IScreenshotrApi> Connect(Uri endpoint)
     {
         IScreenshotrApi client = endpoint.IsFile
-            ? ScreenshotrRepositoryClient.Create(endpoint.AbsolutePath)
-            : await ScreenshotrHttpClient.Create(endpoint.AbsoluteUri)
+            ? ScreenshotrRepositoryClient.Connect(endpoint.AbsolutePath)
+            : await ScreenshotrHttpClient.Connect(endpoint.AbsoluteUri)
             ;
 
         return client;
