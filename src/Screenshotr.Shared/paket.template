@@ -3,7 +3,7 @@ id Screenshotr.Shared
 authors Stefan Maierhofer
 owners Aardvark Platform Team
 projectUrl https://github.com/aardvark-community/screenshotr
-licenseUrl https://github.com/aardvark-community/screenshotr/blob/master/LICENSE
+licenseUrl https://github.com/aardvark-community/screenshotr/blob/main/LICENSE
 repositoryType git
 repositoryUrl https://github.com/aardvark-community/screenshotr
 include-referenced-projects true
