@@ -4,11 +4,9 @@ on:
   push:
     paths-ignore:
     - 'README.md'
-    - 'publish/'
   pull_request:
     paths-ignore:
     - 'README.md'
-    - 'publish/'
     
 jobs:
   build:
