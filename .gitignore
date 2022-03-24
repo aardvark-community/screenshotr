@@ -1,0 +1,8 @@
+**/bin
+**/obj
+.paket/
+data/
+paket-files/
+publish/
+src/.vs
+.ionide/

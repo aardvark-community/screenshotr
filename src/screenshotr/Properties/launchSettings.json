@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "screenshotr": {
+      "commandName": "Project",
+      "commandLineArgs": "import -e http://localhost:5555 Z:\\VRVis\\Screenshots --addRandomLabels"
+    }
+  }
+}

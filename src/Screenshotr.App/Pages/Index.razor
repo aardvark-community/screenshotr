@@ -1,0 +1,14 @@
+﻿@page "/"
+@inject ScreenshotrApp App
+
+<PageTitle>Screenshotr</PageTitle>
+<Filter></Filter>
+<Gallery></Gallery>
+
+
+@code
+{
+	private void Update() => InvokeAsync(this.StateHasChanged);
+    protected override void OnInitialized() => App.OnChange += Update;
+    public void Dispose() => App.OnChange -= Update;
+}

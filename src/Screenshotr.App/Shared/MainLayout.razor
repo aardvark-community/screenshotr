@@ -1,0 +1,38 @@
+﻿@inherits LayoutComponentBase
+@inject ScreenshotrApp App
+
+<PageTitle>Screenshotr.App</PageTitle>
+
+<div class="page">
+
+   @* <div class="sidebar">
+        <NavMenu />
+    </div>*@
+
+    <main>
+        <div class="top-row px-4">
+            <div class="container-fluid">
+                <div class="row justify-content-between">
+                    <div class="col">
+                        <Stats />
+                    </div>
+                    <div class="col-6 text-end">
+                        Version @App.Model.Version
+                    </div>
+                </div>
+            </div>
+            @*<a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>*@
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+@code
+{
+	private void Update() => InvokeAsync(this.StateHasChanged);
+    protected override void OnInitialized() => App.OnChange += Update;
+    public void Dispose() => App.OnChange -= Update;
+}

@@ -1,0 +1,56 @@
+﻿@inject ScreenshotrApp App
+
+<div>
+
+    <div>
+    @foreach (var (year, count) in App.Model.Filter.FilteredYears)
+    {
+        @if (App.Model.Filter.SelectedYears.Contains(year))
+        {
+            <span class="badge bg-primary" style="margin-right: 0.2em; cursor: pointer;"
+                @onclick="() => App.Dispatch(ScreenshotrApp.MessageType.ToggleSelectedYear, year)"
+                >
+                <span>@year (@count)</span>
+            </span>
+        }
+        else
+        {
+            <span class="badge bg-light text-dark" style="margin-right: 0.2em; cursor: pointer;"
+                @onclick="() => App.Dispatch(ScreenshotrApp.MessageType.ToggleSelectedYear, year)"
+                >
+                <span>@year (@count)</span>
+            </span>
+        }
+    }
+    </div>
+
+    <div>
+    @foreach (var (tag, count) in App.Model.Filter.FilteredTags)
+    {
+        @if (App.Model.Filter.SelectedTags.Contains(tag))
+        {
+            <span class="badge bg-primary" style="margin-right: 0.2em; cursor: pointer;"
+                @onclick="() => App.Dispatch(ScreenshotrApp.MessageType.ToggleSelectedTag, tag)"
+                >
+                <span>@tag (@count)</span>
+            </span>
+        }
+        else
+        {
+            <span class="badge bg-light text-dark" style="margin-right: 0.2em; cursor: pointer;"
+                @onclick="() => App.Dispatch(ScreenshotrApp.MessageType.ToggleSelectedTag, tag)"
+                >
+                <span>@tag (@count)</span>
+            </span>
+        }
+    }
+    </div>
+        
+</div>
+
+@code {
+
+	private void Update() => InvokeAsync(this.StateHasChanged);
+    protected override void OnInitialized() => App.OnChange += Update;
+    public void Dispose() => App.OnChange -= Update;
+}

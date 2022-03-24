@@ -1,0 +1,21 @@
+﻿@inject ScreenshotrApp App
+
+<div>
+  <span class="badge rounded-pill bg-info">
+      @App.Model.Filter.CountAll.ToString("N0") images
+  </span>
+
+  <span class="badge rounded-pill bg-info">
+      @App.Model.Filter.AllScreenshots.PerTag.Values.Sum(x => x.Count).ToString("N0") tags
+  </span>
+
+  <span class="badge rounded-pill bg-info">
+      @App.Model.Filter.CountFiltered.ToString("N0") filtered
+  </span>
+</div>
+
+@code {
+	private void Update() => InvokeAsync(this.StateHasChanged);
+    protected override void OnInitialized() => App.OnChange += Update;
+    public void Dispose() => App.OnChange -= Update;
+}

@@ -1,0 +1,68 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32210.308
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Screenshotr.Base", "Screenshotr.Base\Screenshotr.Base.csproj", "{4183A9B1-0327-46DA-A1EE-4CC67EC09F66}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Screenshotr.Test", "Screenshotr.Test\Screenshotr.Test.csproj", "{CCA1474C-49A3-4E3A-B6B5-8DEDACA0534B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Screenshotr.App", "Screenshotr.App\Screenshotr.App.csproj", "{0DFFFB00-3F5B-4012-A808-90DEA7012C25}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "screenshotr", "screenshotr\screenshotr.csproj", "{E50D7F99-BE4C-4A76-B55F-5373D4BC4AB6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Screenshotr.Shared", "Screenshotr.Shared\Screenshotr.Shared.csproj", "{1E503E40-BEC2-40B1-9A49-D5977181E437}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_", "_", "{C92E1FE9-37F3-4B5C-91C4-225539FD1E05}"
+	ProjectSection(SolutionItems) = preProject
+		..\.gitignore = ..\.gitignore
+		..\build.cmd = ..\build.cmd
+		..\build.sh = ..\build.sh
+		..\LICENSE = ..\LICENSE
+		..\paket.dependencies = ..\paket.dependencies
+		..\paket.lock = ..\paket.lock
+		..\README.md = ..\README.md
+		..\run.bat = ..\run.bat
+		..\screenshotr.cmd = ..\screenshotr.cmd
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Screenshotr.Client", "Screenshotr.Client\Screenshotr.Client.csproj", "{E0E29781-7C86-4640-AD08-9BB42AE6DE9B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4183A9B1-0327-46DA-A1EE-4CC67EC09F66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4183A9B1-0327-46DA-A1EE-4CC67EC09F66}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4183A9B1-0327-46DA-A1EE-4CC67EC09F66}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4183A9B1-0327-46DA-A1EE-4CC67EC09F66}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CCA1474C-49A3-4E3A-B6B5-8DEDACA0534B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCA1474C-49A3-4E3A-B6B5-8DEDACA0534B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CCA1474C-49A3-4E3A-B6B5-8DEDACA0534B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CCA1474C-49A3-4E3A-B6B5-8DEDACA0534B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0DFFFB00-3F5B-4012-A808-90DEA7012C25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0DFFFB00-3F5B-4012-A808-90DEA7012C25}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0DFFFB00-3F5B-4012-A808-90DEA7012C25}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0DFFFB00-3F5B-4012-A808-90DEA7012C25}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E50D7F99-BE4C-4A76-B55F-5373D4BC4AB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E50D7F99-BE4C-4A76-B55F-5373D4BC4AB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E50D7F99-BE4C-4A76-B55F-5373D4BC4AB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E50D7F99-BE4C-4A76-B55F-5373D4BC4AB6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E503E40-BEC2-40B1-9A49-D5977181E437}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E503E40-BEC2-40B1-9A49-D5977181E437}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E503E40-BEC2-40B1-9A49-D5977181E437}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E503E40-BEC2-40B1-9A49-D5977181E437}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E0E29781-7C86-4640-AD08-9BB42AE6DE9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E0E29781-7C86-4640-AD08-9BB42AE6DE9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E0E29781-7C86-4640-AD08-9BB42AE6DE9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E0E29781-7C86-4640-AD08-9BB42AE6DE9B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {48269609-07AF-4B4E-9A27-961DDF6F31B0}
+	EndGlobalSection
+EndGlobal

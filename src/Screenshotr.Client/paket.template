@@ -1,0 +1,14 @@
+﻿type project
+id Screenshotr.Client
+authors Stefan Maierhofer
+owners Aardvark Platform Team
+projectUrl https://github.com/aardvark-community/screenshotr
+licenseUrl https://github.com/aardvark-community/screenshotr/blob/master/LICENSE
+repositoryType git
+repositoryUrl https://github.com/aardvark-community/screenshotr
+include-referenced-projects true
+excludeddependencies
+    Aardvark.Build
+description
+    Client library for screenshotr service.
+include-pdbs true

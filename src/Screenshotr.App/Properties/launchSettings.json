@@ -1,0 +1,22 @@
+{
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:36161",
+      "sslPort": 0
+    }
+  },
+  "profiles": {
+    "Screenshotr.App": {
+      "commandName": "Project",
+      "commandLineArgs": "Screenshotr:Data=E:/screenshotr/testrepo2",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "http://localhost:5020",
+      "dotnetRunMessages": true
+    }
+  }
+}
