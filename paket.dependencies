@@ -13,3 +13,6 @@ nuget System.Collections.Immutable                            ~> 6.0.0
 nuget System.Configuration.ConfigurationManager               ~> 6.0.0
 nuget System.Net.Http.Json                                    ~> 6.0.0
 nuget System.Text.Json                                        ~> 6.0.0
+
+// BUILD
+nuget Aardvark.Build                                          ~> 1.0.11

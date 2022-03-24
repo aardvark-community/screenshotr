@@ -1,0 +1,26 @@
+name: Windows
+
+on: 
+  push:
+    paths-ignore:
+    - 'README.md'
+    - 'publish/'
+  pull_request:
+    paths-ignore:
+    - 'README.md'
+    - 'publish/'
+    
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Install Dotnet
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '6.0.103'
+    - name: build
+      run: .\build.cmd
