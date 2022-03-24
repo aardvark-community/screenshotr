@@ -22,6 +22,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_", "_", "{C92E1FE9-37F3-4B
 		..\paket.dependencies = ..\paket.dependencies
 		..\paket.lock = ..\paket.lock
 		..\README.md = ..\README.md
+		..\RELEASE_NOTES.md = ..\RELEASE_NOTES.md
 		..\run.bat = ..\run.bat
 		..\screenshotr.cmd = ..\screenshotr.cmd
 	EndProjectSection
