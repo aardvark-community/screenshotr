@@ -1,0 +1,31 @@
+version: '2.3'
+services:
+ screenshotr:
+   build: .
+   restart: always
+   container_name: screenshotr
+   environment:
+     - Screenshotr:Data=/data
+   volumes:
+     - ./datatest:/data
+   tty: true
+   #ports:
+   #  - 5020:5020
+   networks:
+     - web
+   labels:
+     - "traefik.enable=true"
+     - "traefik.http.routers.screenshotr.entrypoints=http"
+     - "traefik.http.routers.screenshotr.rule=Host(`screenshotr.<mydomain>`)"
+     - "traefik.http.middlewares.screenshotr-https-redirect.redirectscheme.scheme=https"
+     - "traefik.http.routers.screenshotr.middlewares=screenshotr-https-redirect"
+     - "traefik.http.routers.screenshotr-secure.entrypoints=https"
+     - "traefik.http.routers.screenshotr-secure.rule=Host(`screenshotr.<mydomain>`)"
+     - "traefik.http.routers.screenshotr-secure.tls=true"
+     - "traefik.http.routers.screenshotr-secure.service=screenshotr"
+     - "traefik.http.services.screenshotr.loadbalancer.server.port=5020"
+     - "traefik.docker.network=web"
+
+networks:
+  web:
+    external: true        
