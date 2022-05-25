@@ -7,7 +7,9 @@ services:
    environment:
      - Screenshotr:Data=/data
    volumes:
-     - ./datatest:/data
+     - type: bind
+       source: <SET PATH HERE>   # path on host machine ...
+       target: /data             # ... maps to default path inside container
    tty: true
    ports:
      - 5020:5020

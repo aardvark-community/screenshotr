@@ -15,15 +15,15 @@ git clone https://github.com/stefanmaierhofer/screenshotr.git
 cd screenshotr
 run
 ```
-Open https://localhost:5021/ in a your browser.
+Open http://localhost:5020/ in a your browser.
 
 ```bash
-screenshotr import -e https://localhost:5021 --addRandomLabels ./directory/with/images
+screenshotr import -e http://localhost:5020 --addRandomLabels ./directory/with/images
 ```
 
 # Server
 
-- `git clone https://github.com/stefanmaierhofer/screenshotr.git`
+- `git clone git@github.com:aardvark-community/screenshotr.git`
 - `cd screenshotr`
 - `run`
 
@@ -35,7 +35,7 @@ screenshotr import -e https://localhost:5021 --addRandomLabels ./directory/with/
 using Screenshotr;
 
 var filename = "example.jpg";
-var endpoint = "https://localhost:5021";
+var endpoint = "http://localhost:5020";
 
 var client = await ScreenshotrHttpClient.Connect(endpoint);
 
@@ -92,7 +92,7 @@ export Screenshotr:Data=https://localhost:5020
 By default, all screenshot data is stored inside the container and will disappear each time the 
 container is restarted.
 
-Edit `docker-compose.yaml` to configure a permanent data directory on the host machine:
+Edit `docker-compose.yml` to configure a permanent data directory on the host machine:
 ```docker
 ...
 
@@ -103,6 +103,8 @@ volumes:
 
 ...
 ```
+
+There is also an example traefik configuration in `docker-compose.traefik-example.yml`.
 
 ## Run server
 ```bash
