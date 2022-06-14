@@ -18,7 +18,9 @@ public record Custom(ImmutableList<Custom.Entry> Entries)
         => new(entries?.Select(Entry.Create)?.ToImmutableList() ?? ImmutableList<Entry>.Empty);
 
     public Custom Add(Entry e) => this with { Entries = Entries.Add(e) };
+    public Custom AddRange(IEnumerable<Entry> entries) => this with { Entries = Entries.AddRange(entries) };
     public Custom Add(string key, object value) => this with { Entries = Entries.Add(Entry.Create(key, value)) };
+    public Custom AddRange(IEnumerable<(string key, object value)> entries) => this with { Entries = Entries.AddRange(entries.Select(e => Entry.Create(e.key, e.value))) };
 
     [JsonIgnore]
     public int Count => Entries.Count;
@@ -70,11 +72,18 @@ public record Screenshot(
         }
     }
 
-    public Screenshot AddTag(string tag)
-    {
-        if (Tags.Contains(tag)) return this;
-        return this with { Tags = Tags.Add(tag) };
-    }
+    public Screenshot AddTag(string tag) => this with { Tags = Tags.Add(tag) };
+    public Screenshot AddTags(IEnumerable<string> tags) => this with { Tags = Tags.Union(tags) };
+    public Screenshot RemoveTag(string tag) => this with { Tags = Tags.Remove(tag) };
+    public Screenshot RemoveTags(IEnumerable<string> tags) => this with { Tags = Tags.Except(tags) };
+    public Screenshot SetTags(IEnumerable<string> tags) => this with { Tags = tags.ToImmutableHashSet() };
+    public Screenshot SetCustom(Custom custom) => this with { Custom = custom };
+    public Screenshot SetCustom(IEnumerable<Custom.Entry> entries) => this with { Custom = Custom.Create(entries) };
+    public Screenshot SetCustom(IEnumerable<(string Key, object Value)> entries) => this with { Custom = Custom.Create(entries) };
+    public Screenshot AddCustom(Custom.Entry entry) => this with { Custom = Custom.Add(entry) };
+    public Screenshot AddCustom(string key, object value) => this with { Custom = Custom.Add(key, value) };
+    public Screenshot AddCustom(IEnumerable<Custom.Entry> entries) => this with { Custom = Custom.AddRange(entries) };
+    public Screenshot AddCustom(IEnumerable<(string Key, object Value)> entries) => this with { Custom = Custom.AddRange(entries) };
 
     public string ToJson() => JsonSerializer.Serialize(this, Utils.JsonOptions);
 
