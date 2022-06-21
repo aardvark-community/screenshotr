@@ -23,6 +23,18 @@ var endpoint = endpointString != null ? new Uri(endpointString) : null;
 
 try
 {
+    if (args.Contains("--version"))
+    {
+        WriteLine(Global.Version);
+        return;
+    }
+
+    if (args.Contains("--help"))
+    {
+        Usage();
+        return;
+    }
+
     switch (args[0])
     {
         case "import": await Import(args.Tail()); break;
@@ -39,13 +51,18 @@ catch (Exception e)
 
 void Usage()
 {
-    WriteLine("Usage: screenshotr <command> <args*> ");
-    WriteLine("import -e <endpoint> [-t <tags>] <file|folder>* [-x <exclude>] [--addRandomlabels]");
-    WriteLine("list -e <endpoint> [--skip <int>] [--tag <int>]");
-    WriteLine("tail -e <endpoint>");
+    WriteLine("Usage:");
+    WriteLine("  screenshotr --version");
+    WriteLine("  screenshotr --help");
+    WriteLine("  screenshotr <command> <args*> ");
     WriteLine();
-    WriteLine("examples: ");
-    WriteLine("screenshotr import -e https://localhost:5001 -t \"mytag some-other-tag\" img.jpg /data/pictures/");
+    WriteLine("Commands:");
+    WriteLine("  import -e <endpoint> [-t <tags>] <file|folder>* [-x <exclude>] [--addRandomLabels]");
+    WriteLine("  list -e <endpoint> [--skip <int>] [--tag <int>]");
+    WriteLine("  tail -e <endpoint>");
+    WriteLine();
+    WriteLine("Examples: ");
+    WriteLine("  screenshotr import -e https://localhost:5001 -t \"mytag some-other-tag\" img.jpg /data/pictures/");
     Environment.Exit(0);
 }
 
