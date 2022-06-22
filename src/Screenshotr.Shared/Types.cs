@@ -1,7 +1,12 @@
 ﻿using System;
+using System.Collections.Immutable;
 using System.IO;
 
 namespace Screenshotr;
+
+public record ApiKey(string Key, string[] Roles, DateTimeOffset ValidUntil, bool IsEnabled);
+
+public record ApiKeys(string AdminKey, IImmutableDictionary<string, ApiKey> Keys);
 
 public record V2i(int X, int Y);
 

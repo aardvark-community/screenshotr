@@ -6,14 +6,16 @@ using Screenshotr;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
 Console.WriteLine($"[ScreenshotrService] init ...");
-var screenshotrEndpoint = builder.Configuration["Screenshotr:Data"];
-screenshotrEndpoint = Path.GetFullPath(screenshotrEndpoint);
-Console.WriteLine($"[ScreenshotrService]     service endpoint {screenshotrEndpoint}");
-var screenshotrService = ScreenshotrRepositoryClient.Connect(screenshotrEndpoint);
-var status = await screenshotrService.GetStatus(new());
+var screenshotrBaseDir = builder.Configuration["Screenshotr:Data"];
+Console.WriteLine($"[ScreenshotrService]     Screenshotr:Data={screenshotrBaseDir}");
+screenshotrBaseDir = Path.GetFullPath(screenshotrBaseDir);
+var repo = Repository.Init(screenshotrBaseDir);
+var screenshotrService = new ScreenshotrRepositoryClient(repo);
+var status = await screenshotrService.GetStatus();
 Console.WriteLine($"[ScreenshotrService]     version {status.Version}");
-Console.WriteLine($"[ScreenshotrService]     base directory is {screenshotrEndpoint}");
+Console.WriteLine($"[ScreenshotrService]     base directory is {screenshotrBaseDir}");
 Console.WriteLine($"[ScreenshotrService]     found {status.Count} screenshots");
 Console.WriteLine($"[ScreenshotrService]     done");
 
@@ -22,7 +24,7 @@ Console.WriteLine($"[ScreenshotrService]     done");
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<IScreenshotrApi>(screenshotrService);
-builder.Services.AddScoped<ScreenshotrApp>();
+builder.Services.AddScoped<ScreenshotrApp>(_ => new(screenshotrService, repo.ApiKeys.AdminKey));
 builder.Services.AddResponseCompression(opts =>
 {
     opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
@@ -41,17 +43,17 @@ app.UseStaticFiles();
 
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(Path.Combine(screenshotrEndpoint, "data")),
+    FileProvider = new PhysicalFileProvider(Path.Combine(screenshotrBaseDir, "data")),
     RequestPath = "/data"
 });
 
 app.UseRouting();
 
-app.MapPost(Global.ApiPathGetStatus,                ([FromBody] ApiGetStatusRequest req)                => screenshotrService.GetStatus(req));
-app.MapPost(Global.ApiPathGetScreenshotsSegmented,  ([FromBody] ApiGetScreenshotsSegmentedRequest req)  => screenshotrService.GetScreenshotsSegmented(req));
-app.MapPost(Global.ApiPathImportScreenshot,         ([FromBody] ApiImportScreenshotRequest req)         => screenshotrService.ImportScreenshot(req));
-app.MapPost(Global.ApiPathUpdateScreenshot,         ([FromBody] ApiUpdateScreenshotRequest req)         => screenshotrService.UpdateScreenshot(req));
-app.MapPost(Global.ApiPathGetScreenshot,            ([FromBody] ApiGetScreenshotRequest req)            => screenshotrService.GetScreenshot(req));
+app.MapPost(Global.ApiPathStatus,                   ([FromBody] ApiGetStatusRequest req)                => screenshotrService.GetStatus(req)                );
+app.MapPost(Global.ApiPathScreenshotsSegment,       ([FromBody] ApiGetScreenshotsSegmentedRequest req)  => screenshotrService.GetScreenshotsSegmented(req)  );
+app.MapPost(Global.ApiPathScreenshotsImport,        ([FromBody] ApiImportScreenshotRequest req)         => screenshotrService.ImportScreenshot(req)         );
+app.MapPost(Global.ApiPathScreenshotsUpdate,        ([FromBody] ApiUpdateScreenshotRequest req)         => screenshotrService.UpdateScreenshot(req)         );
+app.MapPost(Global.ApiPathScreenshotsGet,           ([FromBody] ApiGetScreenshotRequest req)            => screenshotrService.GetScreenshot(req)            );
 
 app.MapBlazorHub();
 app.MapHub<ScreenshotrHub>("/screenshotrhub");

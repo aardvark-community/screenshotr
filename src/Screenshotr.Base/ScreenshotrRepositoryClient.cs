@@ -8,7 +8,7 @@ public class ScreenshotrRepositoryClient : IScreenshotrApi
 
     public ScreenshotrRepositoryClient(Repository repository)
     {
-        _repo = repository;
+        _repo = repository; 
     }
 
     public static ScreenshotrRepositoryClient Connect(string baseDirectory)
@@ -83,8 +83,23 @@ public class ScreenshotrRepositoryClient : IScreenshotrApi
     public Task<ApiGetScreenshotResponse> GetScreenshot(ApiGetScreenshotRequest request)
         => Task.FromResult(new ApiGetScreenshotResponse(_repo.Entries[request.Id]));
 
-    public Task<ApiGetAllScreenshotsResponse> GetAllScreenshots(ApiGetAllScreenshotsRequest request)
-        => Task.FromResult(new ApiGetAllScreenshotsResponse(_repo.Entries));
+    //public Task<ApiGetAllScreenshotsResponse> GetAllScreenshots(ApiGetAllScreenshotsRequest request)
+    //    => Task.FromResult(new ApiGetAllScreenshotsResponse(_repo.Entries));
+
+    public Task<ApiGenerateApiKeyResponse> GenerateApiKey(ApiGenerateApiKeyRequest request)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<ApiDeleteApiKeyResponse> DeleteApiKey(ApiDeleteApiKeyRequest request)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<ApiListApiKeysResponse> ListApiKeys(ApiListApiKeysRequest request)
+    {
+        throw new NotImplementedException();
+    }
 
     #endregion
 }

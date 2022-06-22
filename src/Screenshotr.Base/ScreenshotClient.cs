@@ -2,14 +2,14 @@
 
 public static class ScreenshotrService
 {
-    public static Task<IScreenshotrApi> Connect(string endpoint)
-        => Connect(new Uri(endpoint));
+    public static Task<IScreenshotrApi> Connect(string endpoint, string apiKey)
+        => Connect(new Uri(endpoint), apiKey);
 
-    public static async Task<IScreenshotrApi> Connect(Uri endpoint)
+    public static async Task<IScreenshotrApi> Connect(Uri endpoint, string apiKey)
     {
         IScreenshotrApi client = endpoint.IsFile
             ? ScreenshotrRepositoryClient.Connect(endpoint.AbsolutePath)
-            : await ScreenshotrHttpClient.Connect(endpoint.AbsoluteUri)
+            : await ScreenshotrHttpClient.Connect(endpoint.AbsoluteUri, apiKey)
             ;
 
         return client;

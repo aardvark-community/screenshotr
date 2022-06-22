@@ -6,7 +6,8 @@ public record ScreenshotrModel(
     string Version,
     string? ActiveTagEditScreenshotId, 
     Filter Filter,
-    IScreenshotrApi Service
+    IScreenshotrApi Service,
+    string ApiKey
     )
 {
     public Screenshot GetScreenshot(string id)
@@ -15,12 +16,13 @@ public record ScreenshotrModel(
 
 public class ScreenshotrApp : ElmApp<ScreenshotrModel, ScreenshotrApp.MessageType>, IDisposable
 {
-    public ScreenshotrApp(IScreenshotrApi service) : base(
+    public ScreenshotrApp(IScreenshotrApi service, string apiKey) : base(
         initialModel: new(
             Global.Version,
             ActiveTagEditScreenshotId: null,
             Filter: Filter.Empty,
-            Service: service
+            Service: service,
+            ApiKey: apiKey
             ),
         update: Update
         )
@@ -66,12 +68,13 @@ public class ScreenshotrApp : ElmApp<ScreenshotrModel, ScreenshotrApp.MessageTyp
         {
             case MessageType.InitScreenshotsFromRepo:
                 {
-                    var all = await m.Service.GetAllScreenshots();
-                    m = m with 
-                    {
-                        Filter = Filter.Create(all.Screenshots, FilterSortingMode.CreatedDescending, 128)
-                    };
-                    break;
+                    throw new NotImplementedException("replacing GetAllScreenshots with list segmented");
+                    //var all = await m.Service.GetAllScreenshots(m.ApiKey);
+                    //m = m with 
+                    //{
+                    //    Filter = Filter.Create(all.Screenshots, FilterSortingMode.CreatedDescending, 128)
+                    //};
+                    //break;
                 }
 
             case MessageType.OnRepositoryUpdated:
@@ -127,7 +130,7 @@ public class ScreenshotrApp : ElmApp<ScreenshotrModel, ScreenshotrApp.MessageTyp
                         var newTag = message.GetArgument<string>();
                         var screenshot = m.GetScreenshot(m.ActiveTagEditScreenshotId);
                         screenshot = screenshot.AddTag(newTag);
-                        await m.Service.UpdateScreenshot(screenshot);
+                        await m.Service.UpdateScreenshot(m.ApiKey, screenshot);
                         m = m with { ActiveTagEditScreenshotId = null };
                     }
                     break;
@@ -138,7 +141,7 @@ public class ScreenshotrApp : ElmApp<ScreenshotrModel, ScreenshotrApp.MessageTyp
                     var (id, tag) = message.GetArgument<(string, string)>();
                     var screenshot = m.GetScreenshot(id);
                     screenshot = screenshot with { Tags = screenshot.Tags.Remove(tag) };
-                    await m.Service.UpdateScreenshot(screenshot);
+                    await m.Service.UpdateScreenshot(m.ApiKey, screenshot);
                     break;
                 }
 

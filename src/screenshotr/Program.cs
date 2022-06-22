@@ -3,6 +3,7 @@
  */
 
 using Microsoft.Extensions.Configuration;
+using Screenshotr;
 using SixLabors.ImageSharp;
 
 
@@ -54,7 +55,7 @@ void Usage()
     WriteLine("Usage:");
     WriteLine("  screenshotr --version");
     WriteLine("  screenshotr --help");
-    WriteLine("  screenshotr <command> <args*> ");
+    WriteLine("  screenshotr -k <apikey> <command> <args*>");
     WriteLine();
     WriteLine("Commands:");
     WriteLine("  import -e <endpoint> [-t <tags>] <file|folder>* [-x <exclude>] [--addRandomLabels]");
@@ -62,12 +63,13 @@ void Usage()
     WriteLine("  tail -e <endpoint>");
     WriteLine();
     WriteLine("Examples: ");
-    WriteLine("  screenshotr import -e https://localhost:5001 -t \"mytag some-other-tag\" img.jpg /data/pictures/");
+    WriteLine("  screenshotr import -e https://localhost:5001 -t \"mytag some-other-tag\" img.jpg /data/pictures/ -k \"<APIKEY>\"");
     Environment.Exit(0);
 }
 
 async Task Tail(string[] args)
 {
+    var apikey = "";
     args = args.Where(x =>
         !x.Contains("Screenshotr:ServiceEndpoint")
         )
@@ -77,6 +79,7 @@ async Task Tail(string[] args)
     {
         switch (args[i].ToLower())
         {
+            case "-k": apikey = new(args[++i]); break;
             case "-e": endpoint = new(args[++i]); break;
             default: { Usage(); return; }
         }
@@ -84,7 +87,7 @@ async Task Tail(string[] args)
 
     if (endpoint == null) { Usage(); return; }
 
-    var repo = await ScreenshotrService.Connect(endpoint);
+    var repo = await ScreenshotrService.Connect(endpoint, apikey);
 
     repo.OnScreenshotAdded += screenshot =>
     {
@@ -101,6 +104,7 @@ async Task Tail(string[] args)
 
 async Task List(string[] args)
 {
+    var apikey = "";
     var skip = 0;
     var take = int.MaxValue;
 
@@ -113,6 +117,7 @@ async Task List(string[] args)
     {
         switch (args[i].ToLower())
         {
+            case "-k": apikey = new(args[++i]); break;
             case "-e": endpoint = new(args[++i]); break;
             case "--skip": skip = int.Parse(args[++i]); break;
             case "--take": take = int.Parse(args[++i]); break;
@@ -122,9 +127,9 @@ async Task List(string[] args)
 
     if (endpoint == null) { Usage(); return; }
 
-    var repo = await ScreenshotrService.Connect(endpoint);
+    var repo = await ScreenshotrService.Connect(endpoint, apikey);
 
-    var reply = await repo.GetScreenshotsSegmented(skip: skip, take: take);
+    var reply = await repo.GetScreenshotsSegmented(apikey, skip: skip, take: take);
     foreach (var s in reply.Screenshots)
     {
         WriteLine(JsonSerializer.Serialize(s, Utils.JsonOptions));
@@ -133,6 +138,7 @@ async Task List(string[] args)
 
 async Task Import(string[] args)
 {
+    var apikey = "";
     var tags = new List<string>();
     var filesAndFolders = new List<string>();
     var excludes = new List<string>();
@@ -142,6 +148,7 @@ async Task Import(string[] args)
     {
         switch (args[i].ToLower())
         {
+            case "-k": apikey = new(args[++i]); break;
             case "-e": endpoint = new(args[++i]); break;
             case "-t": tags.AddRange(Utils.ParseTags(args[++i])); break;
             case "-x": excludes.Add(args[++i]); break;
@@ -155,7 +162,7 @@ async Task Import(string[] args)
 
     IScreenshotrApi repo = endpoint.IsFile
         ? ScreenshotrRepositoryClient.Connect(endpoint.AbsolutePath)
-        : await ScreenshotrHttpClient.Connect(endpoint.AbsoluteUri)
+        : await ScreenshotrHttpClient.Connect(endpoint.AbsoluteUri, apikey)
         ;
 
     var countFilenames = 0;
@@ -192,7 +199,7 @@ async Task Import(string[] args)
 
             var timestamp = new FileInfo(filename).LastWriteTime;
             var buffer = await File.ReadAllBytesAsync(filename);
-            var res = await repo.ImportScreenshot(buffer, finalTags, Custom.Empty, ImportInfo.Now, timestamp);
+            var res = await repo.ImportScreenshot(apikey!, buffer, finalTags, Custom.Empty, ImportInfo.Now, timestamp);
             if (res.Screenshot != null)
             {
                 if (res.IsDuplicate) countDuplicate++; else countSuccess++;
@@ -284,6 +291,3 @@ async Task Import(string[] args)
     WriteLine($"\r\nfinished at {t1}");
     WriteLine($"{dt.TotalSeconds:N0} seconds");
 }
-
-record Foo(string Title, object Custom);
-record Bla(int Year, int Month, int Day);

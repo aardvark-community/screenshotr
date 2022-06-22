@@ -9,18 +9,32 @@ using System.Text.Json;
 
 namespace Screenshotr;
 
-public record Repository(string BaseDirectory, ImmutableDictionary<string, Screenshot> Entries)
+public record Repository
 {
     public static Repository Init(string baseDirectory)
     {
         if (!Directory.Exists(baseDirectory)) Directory.CreateDirectory(baseDirectory);
 
+        var dbdir = Path.Combine(baseDirectory, "db");
+        if (!Directory.Exists(dbdir)) Directory.CreateDirectory(dbdir);
+        var apiKeys = LoadApiKeysFile(Path.Combine(dbdir, "apikeys.json"));
+
         var datadir = Path.Combine(baseDirectory, "data");
         if (!Directory.Exists(datadir)) Directory.CreateDirectory(datadir);
-
         var entries = LoadAndCacheEntries(datadir).ToImmutableDictionary(x => x.Id);
 
-        return new(baseDirectory, entries);
+        return new(baseDirectory, entries, apiKeys);
+    }
+
+    public string BaseDirectory { get; init; }
+    public ImmutableDictionary<string, Screenshot> Entries { get; init; }
+    public ApiKeys ApiKeys { get; init; }
+
+    private Repository(string baseDirectory, ImmutableDictionary<string, Screenshot> entries, ApiKeys apiKeys)
+    {
+        BaseDirectory = baseDirectory;
+        Entries = entries;
+        ApiKeys = apiKeys;
     }
 
     private static IEnumerable<Screenshot> LoadAndCacheEntries(string datadir)
@@ -146,6 +160,48 @@ public record Repository(string BaseDirectory, ImmutableDictionary<string, Scree
                 })
             );
     }
+
+    #region api keys
+
+    private string? _apiKeysFileName;
+
+    public string ApiKeysFileName
+    {
+        get
+        {
+            if (_apiKeysFileName == null) _apiKeysFileName = Path.Combine(BaseDirectory, "db", "apikeys.json");
+            return _apiKeysFileName;
+        }
+    }
+
+    private static ApiKeys LoadApiKeysFile(string filename)
+    {
+        if (!File.Exists(filename))
+        {
+            var akBuffer = new byte[24];
+#if !DEBUG
+            Random.Shared.NextBytes(akBuffer);
+#endif
+            var ak = Convert.ToHexString(akBuffer).ToLower();
+
+            Console.WriteLine($"[NEW ADMIN KEY CREATED] {ak}");
+
+            var x = new ApiKeys(
+                AdminKey: ak,
+                Keys: ImmutableDictionary<string, ApiKey>.Empty
+                );
+
+            var s = JsonSerializer.Serialize(x, JsonOptions);
+            File.WriteAllText(filename, s);
+        }
+
+        var json = File.ReadAllText(filename);
+        var result = JsonSerializer.Deserialize<ApiKeys>(json, JsonOptions);
+        if (result == null) throw new Exception("Failed to deserialize file: {filename}");
+        return result;
+    }
+
+#endregion
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
