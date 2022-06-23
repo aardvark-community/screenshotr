@@ -52,18 +52,39 @@ catch (Exception e)
 
 void Usage()
 {
-    WriteLine("Usage:");
-    WriteLine("  screenshotr --version");
-    WriteLine("  screenshotr --help");
-    WriteLine("  screenshotr -k <apikey> <command> <args*>");
-    WriteLine();
-    WriteLine("Commands:");
-    WriteLine("  import -e <endpoint> [-t <tags>] <file|folder>* [-x <exclude>] [--addRandomLabels]");
-    WriteLine("  list -e <endpoint> [--skip <int>] [--tag <int>]");
-    WriteLine("  tail -e <endpoint>");
-    WriteLine();
-    WriteLine("Examples: ");
-    WriteLine("  screenshotr import -e https://localhost:5001 -t \"mytag some-other-tag\" img.jpg /data/pictures/ -k \"<APIKEY>\"");
+    WriteLine(
+@"Usage:
+    screenshotr <command> <args*> [-e <endpoint> -k <apikey>]
+      You can either specify endpoint (-e) and apikey (-k) each
+      time you run the screenshotr command, or you can use login
+      command, which will remember the values for all subsequent
+      runs (until you logout).
+    screenshotr --version
+      Print version.
+    screenshotr --help
+      Print usage message.
+
+  Commands:
+    import [-t <tags>] <file|folder>* [-x <exclude>] [--addRandomLabels]
+    list [--skip <int>] [--take <int>]
+    tail
+    apikey
+      create -d <description> [-r <role>]+ [--days <float>]
+             Available roles are: admin, import
+      delete <apikey>
+      list
+    login -e <endpoint> -k <apikey>
+    logout
+  
+  Examples:
+    screenshotr login -e ""https://localhost"" -k ""7d10785f41e8...""
+    screenshotr import -t ""mytag some-other-tag"" img.jpg /data/pictures/
+    screenshotr list --skip 10 --take 5
+    screenshotr tail
+    screenshotr apikey create -d ""a key for alice"" -r ""import""
+    screenshotr apikey delete ""2442d075d2f3888...""
+    screenshotr apikey list");
+
     Environment.Exit(0);
 }
 
@@ -129,7 +150,7 @@ async Task List(string[] args)
 
     var repo = await ScreenshotrService.Connect(endpoint, apikey);
 
-    var reply = await repo.GetScreenshotsSegmented(apikey, skip: skip, take: take);
+    var reply = await repo.GetScreenshotsSegmented(skip: skip, take: take);
     foreach (var s in reply.Screenshots)
     {
         WriteLine(JsonSerializer.Serialize(s, Utils.JsonOptions));
@@ -199,7 +220,7 @@ async Task Import(string[] args)
 
             var timestamp = new FileInfo(filename).LastWriteTime;
             var buffer = await File.ReadAllBytesAsync(filename);
-            var res = await repo.ImportScreenshot(apikey!, buffer, finalTags, Custom.Empty, ImportInfo.Now, timestamp);
+            var res = await repo.ImportScreenshot(buffer, finalTags, Custom.Empty, ImportInfo.Now, timestamp);
             if (res.Screenshot != null)
             {
                 if (res.IsDuplicate) countDuplicate++; else countSuccess++;

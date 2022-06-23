@@ -6,7 +6,6 @@ using Screenshotr;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 Console.WriteLine($"[ScreenshotrService] init ...");
 var screenshotrBaseDir = builder.Configuration["Screenshotr:Data"];
 Console.WriteLine($"[ScreenshotrService]     Screenshotr:Data={screenshotrBaseDir}");
@@ -24,7 +23,7 @@ Console.WriteLine($"[ScreenshotrService]     done");
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<IScreenshotrApi>(screenshotrService);
-builder.Services.AddScoped<ScreenshotrApp>(_ => new(screenshotrService, repo.ApiKeys.AdminKey));
+builder.Services.AddScoped<ScreenshotrApp>();
 builder.Services.AddResponseCompression(opts =>
 {
     opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
@@ -54,6 +53,9 @@ app.MapPost(Global.ApiPathScreenshotsSegment,       ([FromBody] ApiGetScreenshot
 app.MapPost(Global.ApiPathScreenshotsImport,        ([FromBody] ApiImportScreenshotRequest req)         => screenshotrService.ImportScreenshot(req)         );
 app.MapPost(Global.ApiPathScreenshotsUpdate,        ([FromBody] ApiUpdateScreenshotRequest req)         => screenshotrService.UpdateScreenshot(req)         );
 app.MapPost(Global.ApiPathScreenshotsGet,           ([FromBody] ApiGetScreenshotRequest req)            => screenshotrService.GetScreenshot(req)            );
+app.MapPost(Global.ApiPathApiKeysGenerate,          ([FromBody] ApiCreateApiKeyRequest req)             => screenshotrService.CreateApiKey(req)             );
+app.MapPost(Global.ApiPathApiKeysDelete,            ([FromBody] ApiDeleteApiKeyRequest req)             => screenshotrService.DeleteApiKey(req)             );
+app.MapPost(Global.ApiPathApiKeysList,              ([FromBody] ApiListApiKeysRequest req)              => screenshotrService.ListApiKeys(req)              );
 
 app.MapBlazorHub();
 app.MapHub<ScreenshotrHub>("/screenshotrhub");

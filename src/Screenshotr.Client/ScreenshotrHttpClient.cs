@@ -13,12 +13,12 @@ namespace Screenshotr;
 public class ScreenshotrHttpClient : IScreenshotrApi
 {
     private readonly HttpClient _httpClient;
-    private readonly string _apikey;
+    private readonly string? _bearer;
 
-    private ScreenshotrHttpClient(string endpoint, string apikey)
+    private ScreenshotrHttpClient(string endpoint, string? apikey)
     {
         _httpClient = new HttpClient() { BaseAddress = new Uri(endpoint) };
-        _apikey = apikey;
+        _bearer = string.IsNullOrWhiteSpace(apikey) ? null : $"Bearer {apikey}";
     }
 
     public static async Task<ScreenshotrHttpClient> Connect(string endpoint, string apikey)
@@ -35,8 +35,8 @@ public class ScreenshotrHttpClient : IScreenshotrApi
             await connection.StartAsync();
         };
 
-        connection.On<Screenshot>("ScreenshotAdded", screenshot => client.OnScreenshotAdded(screenshot));
-        connection.On<Screenshot>("ScreenshotUpdated", screenshot => client.OnScreenshotUpdated(screenshot));
+        connection.On<Screenshot>("ScreenshotAdded", screenshot => client.OnScreenshotAdded?.Invoke(screenshot));
+        connection.On<Screenshot>("ScreenshotUpdated", screenshot => client.OnScreenshotUpdated?.Invoke(screenshot));
 
         try
         {
@@ -54,7 +54,13 @@ public class ScreenshotrHttpClient : IScreenshotrApi
     private async Task<T> Call<T>(object request, string path)
     {
         var url = path;
-        var response = await _httpClient.PostAsync(url, JsonContent.Create(request, null, JsonOptions));
+        var req = new HttpRequestMessage(HttpMethod.Post, url)
+        {
+            Content = JsonContent.Create(request, null, JsonOptions)
+        };
+        if (_bearer != null) req.Headers.Add("Authorization", _bearer);
+        var response = await _httpClient.SendAsync(req);
+        //var response = await _httpClient.PostAsync(url, JsonContent.Create(request, null, JsonOptions));
         if (response.IsSuccessStatusCode)
         {
             try
@@ -87,24 +93,10 @@ public class ScreenshotrHttpClient : IScreenshotrApi
     public Task<ApiImportScreenshotResponse>        ImportScreenshot        (ApiImportScreenshotRequest request)        => Call<ApiImportScreenshotResponse>        (request, Global.ApiPathScreenshotsImport   );
     public Task<ApiUpdateScreenshotResponse>        UpdateScreenshot        (ApiUpdateScreenshotRequest request)        => Call<ApiUpdateScreenshotResponse>        (request, Global.ApiPathScreenshotsUpdate   );
     public Task<ApiGetScreenshotResponse>           GetScreenshot           (ApiGetScreenshotRequest request)           => Call<ApiGetScreenshotResponse>           (request, Global.ApiPathScreenshotsGet      );
-    //public async Task<ApiGetAllScreenshotsResponse> GetAllScreenshots       (ApiGetAllScreenshotsRequest request)
-    //{
-    //    var result = ImmutableDictionary<string, Screenshot>.Empty;
-    //    var i = 0; var segmentSize = 1024;
-    //    while (true)
-    //    {
-    //        var xs = await GetScreenshotsSegmented(new(request.ApiKey, Skip: i, Take: segmentSize));
-    //        if (!xs.Screenshots.Any()) break;
-    //        result = result.AddRange(xs.Screenshots.Select(x => new KeyValuePair<string, Screenshot>(x.Id, x)));
-    //        i += segmentSize;
-    //    }
-    //    return new(result);
-    //}
-
-    public Task<ApiGenerateApiKeyResponse>          GenerateApiKey          (ApiGenerateApiKeyRequest request)          => Call<ApiGenerateApiKeyResponse>          (request, Global.ApiPathApiKeysGenerate     );
+    public Task<ApiCreateApiKeyResponse>          CreateApiKey          (ApiCreateApiKeyRequest request)          => Call<ApiCreateApiKeyResponse>          (request, Global.ApiPathApiKeysGenerate     );
     public Task<ApiDeleteApiKeyResponse>            DeleteApiKey            (ApiDeleteApiKeyRequest request)            => Call<ApiDeleteApiKeyResponse>            (request, Global.ApiPathApiKeysDelete       );
     public Task<ApiListApiKeysResponse>             ListApiKeys             (ApiListApiKeysRequest request)             => Call<ApiListApiKeysResponse>             (request, Global.ApiPathApiKeysList         );
 
-    public event Action<Screenshot> OnScreenshotAdded;
-    public event Action<Screenshot> OnScreenshotUpdated;
+    public event Action<Screenshot>? OnScreenshotAdded;
+    public event Action<Screenshot>? OnScreenshotUpdated;
 }

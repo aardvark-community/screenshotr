@@ -36,13 +36,24 @@ public class ScreenshotrRepositoryClient : IScreenshotrApi
 
     public Task<ApiGetScreenshotsSegmentedResponse> GetScreenshotsSegmented(ApiGetScreenshotsSegmentedRequest request)
     {
-        var xs = _repo.Entries.Values
-            .OrderByDescending(x => x.Created)
-            .Skip(request.Skip)
-            .Take(request.Take)
-            ;
+        ApiGetScreenshotsSegmentedResponse result;
 
-        var result = new ApiGetScreenshotsSegmentedResponse(xs);
+        if (request.Skip >= _repo.Entries.Count)
+        {
+            result = new(Enumerable.Empty<Screenshot>(), Offset: _repo.Entries.Count, Count: 0);
+        }
+        else
+        {
+            var take = Math.Min(request.Take, _repo.Entries.Count - request.Skip);
+            var xs = _repo.Entries.Values
+                .OrderByDescending(x => x.Created)
+                .Skip(request.Skip)
+                .Take(take)
+                ;
+
+            result = new ApiGetScreenshotsSegmentedResponse(xs, Offset: request.Skip, Count: take);
+        }
+
         return Task.FromResult(result);
     }
 
@@ -83,10 +94,7 @@ public class ScreenshotrRepositoryClient : IScreenshotrApi
     public Task<ApiGetScreenshotResponse> GetScreenshot(ApiGetScreenshotRequest request)
         => Task.FromResult(new ApiGetScreenshotResponse(_repo.Entries[request.Id]));
 
-    //public Task<ApiGetAllScreenshotsResponse> GetAllScreenshots(ApiGetAllScreenshotsRequest request)
-    //    => Task.FromResult(new ApiGetAllScreenshotsResponse(_repo.Entries));
-
-    public Task<ApiGenerateApiKeyResponse> GenerateApiKey(ApiGenerateApiKeyRequest request)
+    public Task<ApiCreateApiKeyResponse> CreateApiKey(ApiCreateApiKeyRequest request)
     {
         throw new NotImplementedException();
     }

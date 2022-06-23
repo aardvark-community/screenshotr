@@ -178,19 +178,20 @@ public record Repository
     {
         if (!File.Exists(filename))
         {
-            var akBuffer = new byte[24];
-#if !DEBUG
-            Random.Shared.NextBytes(akBuffer);
+
+#if DEBUG
+            var globalAdmin = ApiKey.Create(isEmptyDebugKey: true, description: "global admin", roles: new[] { Roles.Admin }, validUntil: DateTimeOffset.MaxValue, isEnabled: true, isDeletable: false );
+#else
+            var globalAdmin = ApiKey.Create(description: "global admin", roles: new[] { Roles.Admin }, validUntil: DateTimeOffset.MaxValue, isEnabled: true );
 #endif
-            var ak = Convert.ToHexString(akBuffer).ToLower();
 
-            Console.WriteLine($"[NEW ADMIN KEY CREATED] {ak}");
+            Console.WriteLine();
+            Console.WriteLine(new string('=', 79));
+            Console.WriteLine($"  ADMIN KEY: {globalAdmin.ApiKeyClearText}");
+            Console.WriteLine(new string('=', 79));
+            Console.WriteLine();
 
-            var x = new ApiKeys(
-                AdminKey: ak,
-                Keys: ImmutableDictionary<string, ApiKey>.Empty
-                );
-
+            var x = ApiKeys.Empty.Add(globalAdmin.ApiKey);
             var s = JsonSerializer.Serialize(x, JsonOptions);
             File.WriteAllText(filename, s);
         }
