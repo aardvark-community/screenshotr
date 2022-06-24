@@ -5,7 +5,7 @@ public static class Global
     /// <summary>
     /// Current version string.
     /// </summary>
-    public const string Version = "1.0.2";
+    public const string Version = "1.3.0";
 
     public const string ApiPathStatus                   = "/api/1.0/status";
     public const string ApiPathScreenshotsSegment       = "/api/1.0/screenshots/segment";

@@ -6,6 +6,8 @@ public class ScreenshotrRepositoryClient : IScreenshotrApi
 {
     private Repository _repo;
 
+    public Repository Repository => _repo;
+
     public ScreenshotrRepositoryClient(Repository repository)
     {
         _repo = repository; 

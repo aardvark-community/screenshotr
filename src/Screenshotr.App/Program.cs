@@ -48,14 +48,49 @@ app.UseStaticFiles(new StaticFileOptions
 
 app.UseRouting();
 
-app.MapPost(Global.ApiPathStatus,                   ([FromBody] ApiGetStatusRequest req)                => screenshotrService.GetStatus(req)                );
-app.MapPost(Global.ApiPathScreenshotsSegment,       ([FromBody] ApiGetScreenshotsSegmentedRequest req)  => screenshotrService.GetScreenshotsSegmented(req)  );
-app.MapPost(Global.ApiPathScreenshotsImport,        ([FromBody] ApiImportScreenshotRequest req)         => screenshotrService.ImportScreenshot(req)         );
-app.MapPost(Global.ApiPathScreenshotsUpdate,        ([FromBody] ApiUpdateScreenshotRequest req)         => screenshotrService.UpdateScreenshot(req)         );
-app.MapPost(Global.ApiPathScreenshotsGet,           ([FromBody] ApiGetScreenshotRequest req)            => screenshotrService.GetScreenshot(req)            );
-app.MapPost(Global.ApiPathApiKeysGenerate,          ([FromBody] ApiCreateApiKeyRequest req)             => screenshotrService.CreateApiKey(req)             );
-app.MapPost(Global.ApiPathApiKeysDelete,            ([FromBody] ApiDeleteApiKeyRequest req)             => screenshotrService.DeleteApiKey(req)             );
-app.MapPost(Global.ApiPathApiKeysList,              ([FromBody] ApiListApiKeysRequest req)              => screenshotrService.ListApiKeys(req)              );
+void RegisterApi<T, R>(string path, Func<T, Task<R>> handler, string? role = default)
+{
+    app.MapPost(path, ([FromHeader(Name ="Authorization")] string? authHeader, [FromBody] T req) =>
+    {
+        if (role != null)
+        {
+            if (authHeader != null && authHeader.StartsWith("Bearer "))
+            {
+                var k = authHeader[7..];
+                if (screenshotrService.Repository.ApiKeys.Keys.TryGetValue(k, out var apikey))
+                {
+                    if (apikey.Roles.Contains(role))
+                    {
+                        // ok
+                    }
+                    else
+                    {
+                        throw new Exception($"Missing role {role}.");
+                    }
+                }
+                else
+                {
+                    throw new Exception("Unknown apikey.");
+                }
+            }
+            else
+            {
+                throw new Exception($"Authorization=\"{authHeader}\"");
+            }
+        }
+
+        return handler(req);
+    });
+}
+
+RegisterApi<ApiGetStatusRequest              , ApiGetStatusResponse              >(Global.ApiPathStatus            , screenshotrService.GetStatus                            );
+RegisterApi<ApiGetScreenshotsSegmentedRequest, ApiGetScreenshotsSegmentedResponse>(Global.ApiPathScreenshotsSegment, screenshotrService.GetScreenshotsSegmented              );
+RegisterApi<ApiImportScreenshotRequest       , ApiImportScreenshotResponse       >(Global.ApiPathScreenshotsImport , screenshotrService.ImportScreenshot                     );
+RegisterApi<ApiUpdateScreenshotRequest       , ApiUpdateScreenshotResponse       >(Global.ApiPathScreenshotsUpdate , screenshotrService.UpdateScreenshot                     );
+RegisterApi<ApiGetScreenshotRequest          , ApiGetScreenshotResponse          >(Global.ApiPathScreenshotsGet    , screenshotrService.GetScreenshot                        );
+RegisterApi<ApiCreateApiKeyRequest           , ApiCreateApiKeyResponse           >(Global.ApiPathApiKeysGenerate   , screenshotrService.CreateApiKey           , Roles.Admin );
+RegisterApi<ApiDeleteApiKeyRequest           , ApiDeleteApiKeyResponse           >(Global.ApiPathApiKeysDelete     , screenshotrService.DeleteApiKey           , Roles.Admin );
+RegisterApi<ApiListApiKeysRequest            , ApiListApiKeysResponse            >(Global.ApiPathApiKeysList       , screenshotrService.ListApiKeys            , Roles.Admin );
 
 app.MapBlazorHub();
 app.MapHub<ScreenshotrHub>("/screenshotrhub");

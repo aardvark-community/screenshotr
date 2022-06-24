@@ -5,7 +5,18 @@
 using Microsoft.Extensions.Configuration;
 using Screenshotr;
 using SixLabors.ImageSharp;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+
+string GetLocalCacheDir()
+{
+    var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData, Environment.SpecialFolderOption.Create);
+    var dir = Path.Combine(local, "screenshotr");
+    if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+    return dir;
+}
+string cachedCredentialsFileName = Path.Combine(GetLocalCacheDir(), "cache.json");
 
 IConfiguration Configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
@@ -23,6 +34,12 @@ if (args.Length == 0) Usage();
 var endpoint = default(Uri);
 var apikey = "";
 {
+    if (TryGetCachedCrendentials(out var cc))
+    {
+        endpoint = new Uri(cc.Endpoint);
+        apikey = cc.Apikey;
+    }
+
     var rest = new List<string>();
     for (var i = 0; i < args.Length; i++)
     {
@@ -67,10 +84,12 @@ try
 
     switch (args[0])
     {
-        case "import"   : await Import  (args.Tail()); break;
-        case "list"     : await List    (args.Tail()); break;
-        case "tail"     : await Tail    (args.Tail()); break;
-        case "apikeys"  : await ApiKeys (args.Tail()); break;
+        case "import"    : await Import    (args.Tail()); break;
+        case "list"      : await List      (args.Tail()); break;
+        case "tail"      : await Tail      (args.Tail()); break;
+        case "apikeys"   : await ApiKeys   (args.Tail()); break;
+        case "connect"   : await Connect   (args.Tail()); break;
+        case "disconnect": await Disconnect(args.Tail()); break;
         default: Usage(); break;
     };
 }
@@ -87,9 +106,9 @@ void Usage()
 
   screenshotr <command> <args*> [-e <endpoint> -k <apikey>]
     You can either specify endpoint (-e) and apikey (-k) each
-    time you run the screenshotr command, or you can use login
-    command, which will remember the values for all subsequent
-    runs (until you logout).
+    time you run the screenshotr command, or you can use the
+    connect command, which will remember the values for all subsequent
+    runs (until you disconnect).
 
   screenshotr --version
     Print version.
@@ -106,11 +125,12 @@ void Usage()
              Available roles are: admin, import
       delete <apikey>
       list
-    login -e <endpoint> -k <apikey>
-    logout
+    connect -e <endpoint> -k <apikey>
+    disconnect
   
   Examples:
-    screenshotr login -e ""https://localhost"" -k ""7d10785f41e8...""
+    screenshotr connect -e ""https://localhost"" -k ""7d10785f41e8...""
+    screenshotr disconnect
     screenshotr import -t ""mytag some-other-tag"" img.jpg /data/pictures/
     screenshotr list --skip 10 --take 5
     screenshotr tail
@@ -119,6 +139,28 @@ void Usage()
     screenshotr apikeys list");
 
     Environment.Exit(0);
+}
+
+Task Connect(string[] args)
+{
+    var cc = new CachedCredentials(endpoint.ToString(), apikey);
+    File.WriteAllText(cachedCredentialsFileName, JsonSerializer.Serialize(cc, new JsonSerializerOptions { WriteIndented = true }));
+    return Task.CompletedTask;
+}
+
+bool TryGetCachedCrendentials([NotNullWhen(true)] out CachedCredentials? credentials)
+{
+    credentials = File.Exists(cachedCredentialsFileName)
+        ? JsonSerializer.Deserialize<CachedCredentials>(File.ReadAllText(cachedCredentialsFileName))
+        : null
+        ;
+    return credentials != null;
+}
+
+Task Disconnect(string[] args)
+{
+    File.Delete(cachedCredentialsFileName);
+    return Task.CompletedTask;
 }
 
 async Task ApiKeys(string[] args)

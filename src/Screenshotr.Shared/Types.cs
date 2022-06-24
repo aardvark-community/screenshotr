@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Security.Cryptography;
-using System.Text;
 
 namespace Screenshotr;
+
+public record CachedCredentials(string Endpoint, string Apikey);
 
 public static class Roles
 {
     public const string Admin   = "admin";
-    public const string Import  = "import";
 }
 
 public record ApiKey(string Description, string Key, DateTimeOffset Created, IReadOnlyList<string> Roles, DateTimeOffset ValidUntil, bool IsEnabled, bool IsDeletable)
