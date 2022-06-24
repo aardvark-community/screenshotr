@@ -27,7 +27,7 @@ public record ApiCreateApiKeyRequest(string Description, IEnumerable<string> Rol
 public record ApiCreateApiKeyResponse(ApiKey ApiKey);
 
 public record ApiDeleteApiKeyRequest(string ApiKeyToDelete);
-public record ApiDeleteApiKeyResponse();
+public record ApiDeleteApiKeyResponse(ApiKey? DeletedApiKey);
 
 public record ApiListApiKeysRequest(int Skip, int Take);
 public record ApiListApiKeysResponse(IEnumerable<ApiKey> ApiKeys, int Offset, int Count);
@@ -75,7 +75,7 @@ public static class IScreenshotrApiExtensions
     public static Task<ApiGetScreenshotResponse> GetScreenshot(this IScreenshotrApi self, string id)
         => self.GetScreenshot(new(id));
 
-    public static Task<ApiCreateApiKeyResponse> GenerateApiKey(this IScreenshotrApi self, string description, IReadOnlyList<string> roles, DateTimeOffset validUntil)
+    public static Task<ApiCreateApiKeyResponse> CreateApiKey(this IScreenshotrApi self, string description, IReadOnlyList<string> roles, DateTimeOffset validUntil)
         => self.CreateApiKey(new(description, roles, validUntil));
     
     public static Task<ApiDeleteApiKeyResponse> DeleteApiKey(this IScreenshotrApi self, string apiKeyToDelete)

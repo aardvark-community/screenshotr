@@ -96,17 +96,52 @@ public class ScreenshotrRepositoryClient : IScreenshotrApi
 
     public Task<ApiCreateApiKeyResponse> CreateApiKey(ApiCreateApiKeyRequest request)
     {
-        throw new NotImplementedException();
+        var k = ApiKey.Create(
+            description: request.Description, 
+            roles: request.Roles.ToArray(), 
+            validUntil: request.ValidUntil, 
+            isEnabled: true, 
+            isDeletable: true
+            );
+
+        _repo = _repo with { ApiKeys = _repo.ApiKeys.Add(k) };
+        return Task.FromResult(new ApiCreateApiKeyResponse(k));
     }
 
     public Task<ApiDeleteApiKeyResponse> DeleteApiKey(ApiDeleteApiKeyRequest request)
     {
-        throw new NotImplementedException();
+        if (_repo.ApiKeys.Keys.TryGetValue(request.ApiKeyToDelete, out var x))
+        {
+            _repo = _repo with { ApiKeys = _repo.ApiKeys.Remove(request.ApiKeyToDelete) };
+            return Task.FromResult(new ApiDeleteApiKeyResponse(x));
+        }
+        else
+        {
+            return Task.FromResult(new ApiDeleteApiKeyResponse(null));
+        }
     }
 
     public Task<ApiListApiKeysResponse> ListApiKeys(ApiListApiKeysRequest request)
     {
-        throw new NotImplementedException();
+        ApiListApiKeysResponse result;
+
+        if (request.Skip >= _repo.Entries.Count)
+        {
+            result = new(Enumerable.Empty<ApiKey>(), Offset: _repo.Entries.Count, Count: 0);
+        }
+        else
+        {
+            var take = Math.Min(request.Take, _repo.Entries.Count - request.Skip);
+            var xs = _repo.ApiKeys.Keys.Values
+                .OrderByDescending(x => x.Created)
+                .Skip(request.Skip)
+                .Take(take)
+                ;
+
+            result = new ApiListApiKeysResponse(xs, Offset: request.Skip, Count: take);
+        }
+
+        return Task.FromResult(result);
     }
 
     #endregion

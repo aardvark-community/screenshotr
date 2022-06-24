@@ -41,7 +41,7 @@ public class ScreenshotrHttpClient : IScreenshotrApi
         try
         {
             await connection.StartAsync();
-            Console.WriteLine("[SignalR] Connection started");
+            //Console.WriteLine("[SignalR] Connection started");
         }
         catch (Exception ex)
         {

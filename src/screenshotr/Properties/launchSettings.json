@@ -2,7 +2,7 @@
   "profiles": {
     "screenshotr": {
       "commandName": "Project",
-      "commandLineArgs": "import -e http://localhost:5555 Z:\\VRVis\\Screenshots --addRandomLabels"
+      "commandLineArgs": "apikeys list -e http://localhost:5020 -k 3d271dbe5015d057247f9c31ee72297761a0a8f0cca689fe1274358979709a7651e7c89973b1bdb697a7368ca894f70c"
     }
   }
 }

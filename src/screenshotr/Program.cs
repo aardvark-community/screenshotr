@@ -5,7 +5,7 @@
 using Microsoft.Extensions.Configuration;
 using Screenshotr;
 using SixLabors.ImageSharp;
-
+using System.Globalization;
 
 IConfiguration Configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
@@ -19,8 +19,37 @@ string[] randomLabels = File.ReadAllLines("words.txt");
 if (args.Length == 0) Usage();
 
 
-var endpointString = Configuration["Screenshotr:ServiceEndpoint"];
-var endpoint = endpointString != null ? new Uri(endpointString) : null;
+// extract endpoint and apikey args
+var endpoint = default(Uri);
+var apikey = "";
+{
+    var rest = new List<string>();
+    for (var i = 0; i < args.Length; i++)
+    {
+        switch (args[i].ToLower())
+        {
+            case "-k": apikey = new(args[++i]); break;
+
+            case "-e": endpoint = new(args[++i]); break;
+
+            case "Screenshotr:ServiceEndpoint":
+                {
+                    var endpointString = Configuration["Screenshotr:ServiceEndpoint"];
+                    endpoint = endpointString != null ? new Uri(endpointString) : null;
+                    break;
+                }
+
+            default: rest.Add(args[i]); break;
+        }
+    }
+    args = rest.ToArray();
+}
+if (endpoint == null) { Usage(); return; }
+IScreenshotrApi repo = endpoint.IsFile
+    ? ScreenshotrRepositoryClient.Connect(endpoint.AbsolutePath)
+    : await ScreenshotrHttpClient.Connect(endpoint.AbsoluteUri, apikey)
+    ;
+
 
 try
 {
@@ -38,9 +67,10 @@ try
 
     switch (args[0])
     {
-        case "import": await Import(args.Tail()); break;
-        case "list": await List(args.Tail()); break;
-        case "tail": await Tail(args.Tail()); break;
+        case "import"   : await Import  (args.Tail()); break;
+        case "list"     : await List    (args.Tail()); break;
+        case "tail"     : await Tail    (args.Tail()); break;
+        case "apikeys"  : await ApiKeys (args.Tail()); break;
         default: Usage(); break;
     };
 }
@@ -54,21 +84,24 @@ void Usage()
 {
     WriteLine(
 @"Usage:
-    screenshotr <command> <args*> [-e <endpoint> -k <apikey>]
-      You can either specify endpoint (-e) and apikey (-k) each
-      time you run the screenshotr command, or you can use login
-      command, which will remember the values for all subsequent
-      runs (until you logout).
-    screenshotr --version
-      Print version.
-    screenshotr --help
-      Print usage message.
+
+  screenshotr <command> <args*> [-e <endpoint> -k <apikey>]
+    You can either specify endpoint (-e) and apikey (-k) each
+    time you run the screenshotr command, or you can use login
+    command, which will remember the values for all subsequent
+    runs (until you logout).
+
+  screenshotr --version
+    Print version.
+
+  screenshotr --help
+    Print usage message.
 
   Commands:
     import [-t <tags>] <file|folder>* [-x <exclude>] [--addRandomLabels]
     list [--skip <int>] [--take <int>]
     tail
-    apikey
+    apikeys
       create -d <description> [-r <role>]+ [--days <float>]
              Available roles are: admin, import
       delete <apikey>
@@ -81,34 +114,84 @@ void Usage()
     screenshotr import -t ""mytag some-other-tag"" img.jpg /data/pictures/
     screenshotr list --skip 10 --take 5
     screenshotr tail
-    screenshotr apikey create -d ""a key for alice"" -r ""import""
-    screenshotr apikey delete ""2442d075d2f3888...""
-    screenshotr apikey list");
+    screenshotr apikeys create -d ""alice's import key"" -r ""import""
+    screenshotr apikeys delete ""2442d075d2f3888...""
+    screenshotr apikeys list");
 
     Environment.Exit(0);
 }
 
-async Task Tail(string[] args)
+async Task ApiKeys(string[] args)
 {
-    var apikey = "";
-    args = args.Where(x =>
-        !x.Contains("Screenshotr:ServiceEndpoint")
-        )
-        .ToArray();
+    switch (args[0].ToLower())
+    {
+        case "create": await ApiKeysCreate(args.Tail()); break;
+        case "delete": await ApiKeysDelete(args.Tail()); break;
+        case "list"  : await ApiKeysList  (args.Tail()); break;
+        default: Usage(); break;
+    }
+}
+
+async Task ApiKeysCreate(string[] args)
+{
+    var description = "";
+    var roles = new List<string>();
+    var days = 3650.0;
 
     for (var i = 0; i < args.Length; i++)
     {
         switch (args[i].ToLower())
         {
-            case "-k": apikey = new(args[++i]); break;
-            case "-e": endpoint = new(args[++i]); break;
+            case "-d": description = args[++i]; break;
+            case "-r": roles.Add(args[++i]); break;
+            case "--days": days = double.Parse(args[++i], CultureInfo.InvariantCulture); break;
             default: { Usage(); return; }
         }
     }
 
-    if (endpoint == null) { Usage(); return; }
+    var reply = await repo.CreateApiKey(description, roles, DateTimeOffset.UtcNow.AddDays(days));
+    WriteLine(JsonSerializer.Serialize(reply, Utils.JsonOptions));
+}
+async Task ApiKeysDelete(string[] args)
+{
+    foreach (var k in args)
+    {
+        var r = await repo.DeleteApiKey(k);
+        if (r.DeletedApiKey != null)
+        {
+            WriteLine(JsonSerializer.Serialize(r.DeletedApiKey, Utils.JsonOptions));
+        }
+        else
+        {
+            WriteLine("{}");
+        }
+    }
+}
+async Task ApiKeysList(string[] args)
+{
+    var skip = 0;
+    var take = int.MaxValue;
 
-    var repo = await ScreenshotrService.Connect(endpoint, apikey);
+    for (var i = 0; i < args.Length; i++)
+    {
+        switch (args[i].ToLower())
+        {
+            case "--skip": skip = int.Parse(args[++i]); break;
+            case "--take": take = int.Parse(args[++i]); break;
+            default: { Usage(); return; }
+        }
+    }
+
+    var reply = await repo.ListApiKeys(skip: skip, take: take);
+    foreach (var x in reply.ApiKeys)
+    {
+        WriteLine(JsonSerializer.Serialize(x, Utils.JsonOptions));
+    }
+}
+
+Task Tail(string[] args)
+{
+    if (args.Length > 0) { Usage(); return Task.CompletedTask; }
 
     repo.OnScreenshotAdded += screenshot =>
     {
@@ -121,45 +204,33 @@ async Task Tail(string[] args)
     };
 
     ReadLine();
+    return Task.CompletedTask;
 }
 
 async Task List(string[] args)
 {
-    var apikey = "";
     var skip = 0;
     var take = int.MaxValue;
-
-    args = args.Where(x =>
-        !x.Contains("Screenshotr:ServiceEndpoint") 
-        )
-        .ToArray();
 
     for (var i = 0; i < args.Length; i++)
     {
         switch (args[i].ToLower())
         {
-            case "-k": apikey = new(args[++i]); break;
-            case "-e": endpoint = new(args[++i]); break;
             case "--skip": skip = int.Parse(args[++i]); break;
             case "--take": take = int.Parse(args[++i]); break;
             default: { Usage(); return; }
         }
     }
 
-    if (endpoint == null) { Usage(); return; }
-
-    var repo = await ScreenshotrService.Connect(endpoint, apikey);
-
     var reply = await repo.GetScreenshotsSegmented(skip: skip, take: take);
-    foreach (var s in reply.Screenshots)
+    foreach (var x in reply.Screenshots)
     {
-        WriteLine(JsonSerializer.Serialize(s, Utils.JsonOptions));
+        WriteLine(JsonSerializer.Serialize(x, Utils.JsonOptions));
     }
 }
 
 async Task Import(string[] args)
 {
-    var apikey = "";
     var tags = new List<string>();
     var filesAndFolders = new List<string>();
     var excludes = new List<string>();
@@ -169,8 +240,6 @@ async Task Import(string[] args)
     {
         switch (args[i].ToLower())
         {
-            case "-k": apikey = new(args[++i]); break;
-            case "-e": endpoint = new(args[++i]); break;
             case "-t": tags.AddRange(Utils.ParseTags(args[++i])); break;
             case "-x": excludes.Add(args[++i]); break;
             case "--addrandomlabels": addRandomLabels = true; break;
@@ -178,13 +247,7 @@ async Task Import(string[] args)
         }
     }
 
-    if (endpoint == null) { Usage(); return; }
     if (filesAndFolders.Count == 0) { Usage(); return; }
-
-    IScreenshotrApi repo = endpoint.IsFile
-        ? ScreenshotrRepositoryClient.Connect(endpoint.AbsolutePath)
-        : await ScreenshotrHttpClient.Connect(endpoint.AbsoluteUri, apikey)
-        ;
 
     var countFilenames = 0;
     var countSuccess = 0;

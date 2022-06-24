@@ -187,11 +187,11 @@ public record Repository
 
             Console.WriteLine();
             Console.WriteLine(new string('=', 79));
-            Console.WriteLine($"  ADMIN KEY: {globalAdmin.ApiKeyClearText}");
+            Console.WriteLine($"  ADMIN KEY: {globalAdmin.Key}");
             Console.WriteLine(new string('=', 79));
             Console.WriteLine();
 
-            var x = ApiKeys.Empty.Add(globalAdmin.ApiKey);
+            var x = ApiKeys.Empty.Add(globalAdmin);
             var s = JsonSerializer.Serialize(x, JsonOptions);
             File.WriteAllText(filename, s);
         }

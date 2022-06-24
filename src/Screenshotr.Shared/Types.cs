@@ -13,7 +13,7 @@ public static class Roles
     public const string Import  = "import";
 }
 
-public record ApiKey(string Description, string Hash, string Salt, DateTimeOffset Created, IReadOnlyList<string> Roles, DateTimeOffset ValidUntil, bool IsEnabled, bool IsDeletable)
+public record ApiKey(string Description, string Key, DateTimeOffset Created, IReadOnlyList<string> Roles, DateTimeOffset ValidUntil, bool IsEnabled, bool IsDeletable)
 {
     private static readonly RandomNumberGenerator _rng = RandomNumberGenerator.Create();
     private static byte[] RandomBytes(int count)
@@ -24,26 +24,20 @@ public record ApiKey(string Description, string Hash, string Salt, DateTimeOffse
     }
 
 #if DEBUG
-    public static (ApiKey ApiKey, string ApiKeyClearText) Create(bool isEmptyDebugKey, string description, string[] roles, DateTimeOffset validUntil, bool isEnabled, bool isDeletable)
+    public static ApiKey Create(string description, string[] roles, DateTimeOffset validUntil, bool isEnabled, bool isDeletable, bool isEmptyDebugKey = false)
 #else
-    public static (ApiKey ApiKey, string ApiKeyClearText) Create(string description, string[] roles, DateTimeOffset validUntil, bool isEnabled = true, bool isDeletable = false)
+    public static ApiKey Create(string description, string[] roles, DateTimeOffset validUntil, bool isEnabled = true, bool isDeletable = false)
 #endif
     {
-        // key
 #if DEBUG
-        var salt = ToHexString(isEmptyDebugKey ? new byte[16] : RandomBytes(16));
-        var k = ToHexString(isEmptyDebugKey ? new byte[16] : RandomBytes(16));
+        var k = ToHexString(isEmptyDebugKey ? new byte[32] : RandomBytes(32));
 #else
-        var salt = ToHexString(RandomBytes(16));
         var k = ToHexString(RandomBytes(32));
 #endif
-        var kSalted = salt + k;
-        var h = ToHexString(SHA256.Create().ComputeHash(Encoding.ASCII.GetBytes(kSalted)));
 
         var ak = new ApiKey(
             Description: description,
-            Hash: h,
-            Salt: salt,
+            Key: k,
             Created: DateTimeOffset.Now,
             Roles: roles,
             ValidUntil: validUntil,
@@ -51,7 +45,7 @@ public record ApiKey(string Description, string Hash, string Salt, DateTimeOffse
             IsDeletable: isDeletable
             );
 
-        return (ak, kSalted);
+        return ak;
     }
 
     public static string ToHexString(byte[] xs)
@@ -84,7 +78,8 @@ public record ApiKey(string Description, string Hash, string Salt, DateTimeOffse
 public record ApiKeys(IImmutableDictionary<string, ApiKey> Keys)
 {
     public static readonly ApiKeys Empty = new(ImmutableDictionary<string, ApiKey>.Empty);
-    public ApiKeys Add(ApiKey k) => this with { Keys = Keys.Add(k.Hash, k) };
+    public ApiKeys Add(ApiKey k) => this with { Keys = Keys.Add(k.Key, k) };
+    public ApiKeys Remove(ApiKey k) => this with { Keys = Keys.Remove(k.Key) };
     public ApiKeys Remove(string h) => this with { Keys = Keys.Remove(h) };
 }
 
