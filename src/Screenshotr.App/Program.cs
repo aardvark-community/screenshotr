@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.SignalR;
@@ -50,36 +51,12 @@ app.UseRouting();
 
 void RegisterApi<T, R>(string path, Func<T, Task<R>> handler, string? role = default)
 {
-    app.MapPost(path, ([FromHeader(Name ="Authorization")] string? authHeader, [FromBody] T req) =>
+    app.MapPost(path, async ([FromHeader(Name = "Authorization")] string? authHeader, [FromBody] T req) =>
     {
-        if (role != null)
-        {
-            if (authHeader != null && authHeader.StartsWith("Bearer "))
-            {
-                var k = authHeader[7..];
-                if (screenshotrService.Repository.ApiKeys.Keys.TryGetValue(k, out var apikey))
-                {
-                    if (apikey.Roles.Contains(role))
-                    {
-                        // ok
-                    }
-                    else
-                    {
-                        throw new Exception($"Missing role {role}.");
-                    }
-                }
-                else
-                {
-                    throw new Exception("Unknown apikey.");
-                }
-            }
-            else
-            {
-                throw new Exception($"Authorization=\"{authHeader}\"");
-            }
-        }
-
-        return handler(req);
+        return (screenshotrService.Repository.ApiKeys.HasRole(authHeader, role))
+            ? Results.Ok(await handler(req))
+            : Results.StatusCode(StatusCodes.Status403Forbidden)
+            ;
     });
 }
 

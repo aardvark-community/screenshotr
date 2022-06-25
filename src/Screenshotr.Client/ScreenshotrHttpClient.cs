@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -60,7 +61,7 @@ public class ScreenshotrHttpClient : IScreenshotrApi
         };
         if (_bearer != null) req.Headers.Add("Authorization", _bearer);
         var response = await _httpClient.SendAsync(req);
-        //var response = await _httpClient.PostAsync(url, JsonContent.Create(request, null, JsonOptions));
+
         if (response.IsSuccessStatusCode)
         {
             try
@@ -75,7 +76,14 @@ public class ScreenshotrHttpClient : IScreenshotrApi
         }
         else
         {
-            throw new Exception($"Request failed {response.StatusCode},  {await response.Content.ReadAsStringAsync()}");
+            if (response.StatusCode == HttpStatusCode.Forbidden)
+            {
+                throw new Exception($"403 Forbidden.");
+            }
+            else
+            {
+                throw new Exception($"{response.StatusCode}.\n{await response.Content.ReadAsStringAsync()}");
+            }
         }
     }
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -88,14 +96,14 @@ public class ScreenshotrHttpClient : IScreenshotrApi
         WriteIndented = true,
     };
 
-    public Task<ApiGetStatusResponse>               GetStatus               (ApiGetStatusRequest request)               => Call<ApiGetStatusResponse>               (request, Global.ApiPathStatus              );
-    public Task<ApiGetScreenshotsSegmentedResponse> GetScreenshotsSegmented (ApiGetScreenshotsSegmentedRequest request) => Call<ApiGetScreenshotsSegmentedResponse> (request, Global.ApiPathScreenshotsSegment  );
-    public Task<ApiImportScreenshotResponse>        ImportScreenshot        (ApiImportScreenshotRequest request)        => Call<ApiImportScreenshotResponse>        (request, Global.ApiPathScreenshotsImport   );
-    public Task<ApiUpdateScreenshotResponse>        UpdateScreenshot        (ApiUpdateScreenshotRequest request)        => Call<ApiUpdateScreenshotResponse>        (request, Global.ApiPathScreenshotsUpdate   );
-    public Task<ApiGetScreenshotResponse>           GetScreenshot           (ApiGetScreenshotRequest request)           => Call<ApiGetScreenshotResponse>           (request, Global.ApiPathScreenshotsGet      );
-    public Task<ApiCreateApiKeyResponse>          CreateApiKey          (ApiCreateApiKeyRequest request)          => Call<ApiCreateApiKeyResponse>          (request, Global.ApiPathApiKeysGenerate     );
-    public Task<ApiDeleteApiKeyResponse>            DeleteApiKey            (ApiDeleteApiKeyRequest request)            => Call<ApiDeleteApiKeyResponse>            (request, Global.ApiPathApiKeysDelete       );
-    public Task<ApiListApiKeysResponse>             ListApiKeys             (ApiListApiKeysRequest request)             => Call<ApiListApiKeysResponse>             (request, Global.ApiPathApiKeysList         );
+    public Task<ApiGetStatusResponse              > GetStatus               (ApiGetStatusRequest request              ) => Call<ApiGetStatusResponse              > (request, Global.ApiPathStatus            );
+    public Task<ApiGetScreenshotsSegmentedResponse> GetScreenshotsSegmented (ApiGetScreenshotsSegmentedRequest request) => Call<ApiGetScreenshotsSegmentedResponse> (request, Global.ApiPathScreenshotsSegment);
+    public Task<ApiImportScreenshotResponse       > ImportScreenshot        (ApiImportScreenshotRequest request       ) => Call<ApiImportScreenshotResponse       > (request, Global.ApiPathScreenshotsImport );
+    public Task<ApiUpdateScreenshotResponse       > UpdateScreenshot        (ApiUpdateScreenshotRequest request       ) => Call<ApiUpdateScreenshotResponse       > (request, Global.ApiPathScreenshotsUpdate );
+    public Task<ApiGetScreenshotResponse          > GetScreenshot           (ApiGetScreenshotRequest request          ) => Call<ApiGetScreenshotResponse          > (request, Global.ApiPathScreenshotsGet    );
+    public Task<ApiCreateApiKeyResponse           > CreateApiKey            (ApiCreateApiKeyRequest request           ) => Call<ApiCreateApiKeyResponse           > (request, Global.ApiPathApiKeysGenerate   );
+    public Task<ApiDeleteApiKeyResponse           > DeleteApiKey            (ApiDeleteApiKeyRequest request           ) => Call<ApiDeleteApiKeyResponse           > (request, Global.ApiPathApiKeysDelete     );
+    public Task<ApiListApiKeysResponse            > ListApiKeys             (ApiListApiKeysRequest request            ) => Call<ApiListApiKeysResponse            > (request, Global.ApiPathApiKeysList       );
 
     public event Action<Screenshot>? OnScreenshotAdded;
     public event Action<Screenshot>? OnScreenshotUpdated;

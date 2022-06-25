@@ -127,13 +127,13 @@ public class ScreenshotrRepositoryClient : IScreenshotrApi
     {
         ApiListApiKeysResponse result;
 
-        if (request.Skip >= _repo.Entries.Count)
+        if (request.Skip >= _repo.ApiKeys.Count)
         {
             result = new(Enumerable.Empty<ApiKey>(), Offset: _repo.Entries.Count, Count: 0);
         }
         else
         {
-            var take = Math.Min(request.Take, _repo.Entries.Count - request.Skip);
+            var take = Math.Min(request.Take, _repo.ApiKeys.Count - request.Skip);
             var xs = _repo.ApiKeys.Keys.Values
                 .OrderByDescending(x => x.Created)
                 .Skip(request.Skip)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 
 namespace Screenshotr;
@@ -78,9 +79,34 @@ public record ApiKey(string Description, string Key, DateTimeOffset Created, IRe
 public record ApiKeys(IImmutableDictionary<string, ApiKey> Keys)
 {
     public static readonly ApiKeys Empty = new(ImmutableDictionary<string, ApiKey>.Empty);
+    public int Count => Keys.Count;
     public ApiKeys Add(ApiKey k) => this with { Keys = Keys.Add(k.Key, k) };
-    public ApiKeys Remove(ApiKey k) => this with { Keys = Keys.Remove(k.Key) };
-    public ApiKeys Remove(string h) => this with { Keys = Keys.Remove(h) };
+    public ApiKeys Remove(ApiKey k) => k.IsDeletable ? this with { Keys = Keys.Remove(k.Key) } : this;
+    public ApiKeys Remove(string h)
+    {
+        if (!Keys.TryGetValue(h, out var k)) return this;
+        if (!k.IsDeletable) return this;
+        return Remove(k);
+    }
+
+    public bool HasRole(string? authHeader, string? role)
+    {
+        if (string.IsNullOrWhiteSpace(role)) return true;
+        if (authHeader == null || string.IsNullOrWhiteSpace(authHeader)) return false;
+        if (!authHeader.StartsWith("Bearer ") == true) return false;
+
+        if (Keys.TryGetValue(authHeader.Substring(7), out var apikey))
+        {
+            if (apikey.IsEnabled == false) return false;
+            if (DateTimeOffset.UtcNow > apikey.ValidUntil) return false;
+            if (!apikey.Roles.Contains(role)) return false;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
 }
 
 public record V2i(int X, int Y);
