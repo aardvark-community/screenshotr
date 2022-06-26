@@ -11,7 +11,8 @@ public record CachedCredentials(string Endpoint, string Apikey);
 
 public static class Roles
 {
-    public const string Admin   = "admin";
+    public const string Admin    = "admin";
+    public const string Importer = "importer";
 }
 
 public record ApiKey(string Description, string Key, DateTimeOffset Created, IReadOnlyList<string> Roles, DateTimeOffset ValidUntil, bool IsEnabled, bool IsDeletable)
@@ -89,6 +90,9 @@ public record ApiKeys(IImmutableDictionary<string, ApiKey> Keys)
         return Remove(k);
     }
 
+    /// <summary>
+    /// Admin role includes ALL roles.
+    /// </summary>
     public bool HasRole(string? authHeader, string? role)
     {
         if (string.IsNullOrWhiteSpace(role)) return true;
@@ -97,15 +101,13 @@ public record ApiKeys(IImmutableDictionary<string, ApiKey> Keys)
 
         if (Keys.TryGetValue(authHeader.Substring(7), out var apikey))
         {
-            if (apikey.IsEnabled == false) return false;
+            if (apikey.IsEnabled == false)                 return false;
             if (DateTimeOffset.UtcNow > apikey.ValidUntil) return false;
-            if (!apikey.Roles.Contains(role)) return false;
-            return true;
+            if (apikey.Roles.Contains(Roles.Admin))        return true;
+            if (apikey.Roles.Contains(role))               return true;
         }
-        else
-        {
-            return false;
-        }
+
+        return false;
     }
 }
 

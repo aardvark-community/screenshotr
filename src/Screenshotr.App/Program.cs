@@ -60,14 +60,14 @@ void RegisterApi<T, R>(string path, Func<T, Task<R>> handler, string? role = def
     });
 }
 
-RegisterApi<ApiGetStatusRequest              , ApiGetStatusResponse              >(Global.ApiPathStatus            , screenshotrService.GetStatus                            );
-RegisterApi<ApiGetScreenshotsSegmentedRequest, ApiGetScreenshotsSegmentedResponse>(Global.ApiPathScreenshotsSegment, screenshotrService.GetScreenshotsSegmented              );
-RegisterApi<ApiImportScreenshotRequest       , ApiImportScreenshotResponse       >(Global.ApiPathScreenshotsImport , screenshotrService.ImportScreenshot                     );
-RegisterApi<ApiUpdateScreenshotRequest       , ApiUpdateScreenshotResponse       >(Global.ApiPathScreenshotsUpdate , screenshotrService.UpdateScreenshot                     );
-RegisterApi<ApiGetScreenshotRequest          , ApiGetScreenshotResponse          >(Global.ApiPathScreenshotsGet    , screenshotrService.GetScreenshot                        );
-RegisterApi<ApiCreateApiKeyRequest           , ApiCreateApiKeyResponse           >(Global.ApiPathApiKeysGenerate   , screenshotrService.CreateApiKey           , Roles.Admin );
-RegisterApi<ApiDeleteApiKeyRequest           , ApiDeleteApiKeyResponse           >(Global.ApiPathApiKeysDelete     , screenshotrService.DeleteApiKey           , Roles.Admin );
-RegisterApi<ApiListApiKeysRequest            , ApiListApiKeysResponse            >(Global.ApiPathApiKeysList       , screenshotrService.ListApiKeys            , Roles.Admin );
+RegisterApi<ApiGetStatusRequest              , ApiGetStatusResponse              >(Global.ApiPathStatus            , screenshotrService.GetStatus                               );
+RegisterApi<ApiGetScreenshotsSegmentedRequest, ApiGetScreenshotsSegmentedResponse>(Global.ApiPathScreenshotsSegment, screenshotrService.GetScreenshotsSegmented                 );
+RegisterApi<ApiImportScreenshotRequest       , ApiImportScreenshotResponse       >(Global.ApiPathScreenshotsImport , screenshotrService.ImportScreenshot       , Roles.Importer );
+RegisterApi<ApiUpdateScreenshotRequest       , ApiUpdateScreenshotResponse       >(Global.ApiPathScreenshotsUpdate , screenshotrService.UpdateScreenshot                        );
+RegisterApi<ApiGetScreenshotRequest          , ApiGetScreenshotResponse          >(Global.ApiPathScreenshotsGet    , screenshotrService.GetScreenshot                           );
+RegisterApi<ApiCreateApiKeyRequest           , ApiCreateApiKeyResponse           >(Global.ApiPathApiKeysGenerate   , screenshotrService.CreateApiKey           , Roles.Admin    );
+RegisterApi<ApiDeleteApiKeyRequest           , ApiDeleteApiKeyResponse           >(Global.ApiPathApiKeysDelete     , screenshotrService.DeleteApiKey           , Roles.Admin    );
+RegisterApi<ApiListApiKeysRequest            , ApiListApiKeysResponse            >(Global.ApiPathApiKeysList       , screenshotrService.ListApiKeys            , Roles.Admin    );
 
 app.MapBlazorHub();
 app.MapHub<ScreenshotrHub>("/screenshotrhub");
