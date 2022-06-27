@@ -102,7 +102,7 @@ catch (Exception e)
 void Usage()
 {
     WriteLine(
-@"Usage:
+$@"Usage:
 
   screenshotr <command> <args*> [-e <endpoint> -k <apikey>]
     You can either specify endpoint (-e) and apikey (-k) each
@@ -122,7 +122,7 @@ void Usage()
     tail
     apikeys
       create -d <description> [-r <role>]+ [--days <float>]
-             Available roles are: admin, import
+             Available roles are: {Roles.Admin}, {Roles.Importer}
       delete <apikey>
       list
     connect -e <endpoint> -k <apikey>
@@ -134,7 +134,7 @@ void Usage()
     screenshotr import -t ""mytag some-other-tag"" img.jpg /data/pictures/
     screenshotr list --skip 10 --take 5
     screenshotr tail
-    screenshotr apikeys create -d ""alice's import key"" -r ""import""
+    screenshotr apikeys create -d ""alice's import key"" -r ""{Roles.Importer}""
     screenshotr apikeys delete ""2442d075d2f3888...""
     screenshotr apikeys list");
 
