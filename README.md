@@ -48,59 +48,80 @@ await client.ImportScreenshot(
 
 # Command Line Tool
 
-## Commands
-
-`screenshotr <command> <args*>`
-
-### import
-
-```
-screenshotr import -e <endpoint> [-t <tags>] <file|folder>* [-x <exclude>]
-```
-
-Example
-```bash
-screenshotr import -e "https://localhost:5020" -t "foo;bar;haha" "./images"
-```
-
-### list
-
-`screenshotr list -e <endpoint> [--skip <int>] [--take <int>]`
-
-### tail
-
-`screenshotr tail -e <endpoint>`
-
-## Configuration
-
-Windows
+## Usage
 
 ```bash
-set Screenshotr:Data=https://localhost:5020 
+Usage:
+
+  screenshotr <command> <args*> [-e <endpoint> -k <apikey>]
+    You can either specify endpoint (-e) and apikey (-k) each
+    time you run the screenshotr command, or you can use the
+    connect command, which will remember the values for all subsequent
+    runs (until you disconnect).
+
+  screenshotr --version
+    Print version.
+
+  screenshotr --help
+    Print usage message.
+
+  Commands:
+    import [-t <tags>] <file|folder>* [-x <exclude>] [--addRandomLabels]
+    list [--skip <int>] [--take <int>]
+    tail
+    apikeys
+      create -d <description> [-r <role>]+ [--days <float>]
+             Available roles are: admin, import
+      delete <apikey>
+      list
+    connect -e <endpoint> -k <apikey>
+    disconnect
+
+  Examples:
+    screenshotr connect -e "http://localhost" -k "7d10785f41e8..."
+    screenshotr disconnect
+    screenshotr import -t "mytag some-other-tag" img.jpg /data/pictures/
+    screenshotr list --skip 10 --take 5
+    screenshotr tail
+    screenshotr apikeys create -d "alice's import key" -r "import"
+    screenshotr apikeys delete "2442d075d2f3888..."
+    screenshotr apikeys list
 ```
 
-Linux
 
-```bash
-export Screenshotr:Data=https://localhost:5020
-```
 
 # Docker
 
-## Configuration
+## Build
+A ready-to-run docker image can be built by running
+```bash
+docker build -t screenshotr .
+```
+in the project's root directory. 
 
-By default, all screenshot data is stored inside the container and will disappear each time the 
-container is restarted.
+## Run
+
+```bash
+docker run -p 5020:5020 screenshotr
+```
+
+By default, all data is stored inside the container and will disappear each time the 
+container is restarted. In order to permanently store your data, you have to bind a directory on your host machine to `/data` inside the container, e.g.
+
+```bash
+docker run screenshotr -p 5020:5020 -v /my/permanent/storage:/data
+```
+
+
+# Docker Compose
+
+## Configuration
 
 Edit `docker-compose.yml` to configure a permanent data directory on the host machine:
 ```docker
 ...
-
 volumes:
-   - type: bind
-     source: <SET PATH HERE>   # path on host machine ...
-     target: /data             # ... maps to default path inside container
-
+  - /my/permanent/storage:/data
 ...
 ```
 
@@ -111,7 +132,4 @@ There is also an example traefik configuration in `docker-compose.traefik-exampl
 docker compose up -d
 ```
 
-## Build docker image
-```bash
-docker build -t screenshotr .
-```
+
