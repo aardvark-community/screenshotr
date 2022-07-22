@@ -87,8 +87,8 @@ public record Repository
     }
 
     public async Task<(Repository Repository, Screenshot? Screenshot, bool IsDuplicate)> ImportScreenshot(
-        byte[] buffer, 
-        DateTimeOffset? timestamp, 
+        byte[] buffer,
+        DateTimeOffset? timestamp,
         IEnumerable<string> tags,
         Custom custom,
         ImportInfo importInfo
@@ -107,10 +107,10 @@ public record Repository
             var size = new V2i(info.Width, info.Height);
 
             var screenshot = new Screenshot(
-                Id: id, 
+                Id: id,
                 Created: timestamp.Value,
-                Bytes: buffer.Length, 
-                Size: size, 
+                Bytes: buffer.Length,
+                Size: size,
                 Tags: tags.ToImmutableHashSet(),
                 Custom: custom,
                 importInfo
@@ -180,7 +180,7 @@ public record Repository
         {
 
 #if DEBUG
-            var globalAdmin = ApiKey.Create(isEmptyDebugKey: true, description: "global admin", roles: new[] { Roles.Admin }, validUntil: DateTimeOffset.MaxValue, isEnabled: true, isDeletable: false );
+            var globalAdmin = ApiKey.Create(isEmptyDebugKey: true, description: "global admin", roles: new[] { Roles.Admin }, validUntil: DateTimeOffset.MaxValue, isEnabled: true, isDeletable: false);
 #else
             var globalAdmin = ApiKey.Create(description: "global admin", roles: new[] { Roles.Admin }, validUntil: DateTimeOffset.MaxValue, isEnabled: true );
 #endif
@@ -202,7 +202,16 @@ public record Repository
         return result;
     }
 
-#endregion
+    public Repository SaveApiKeys()
+    {
+        var json = JsonSerializer.Serialize(ApiKeys, JsonOptions);
+        Console.Write($"writing {ApiKeysFileName} ... ");
+        File.WriteAllText(ApiKeysFileName, json);
+        Console.WriteLine("done");
+        return this;
+    }
+
+    #endregion
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
