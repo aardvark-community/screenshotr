@@ -6,3 +6,4 @@ paket-files/
 publish/
 src/.vs
 .ionide/
+.fake
