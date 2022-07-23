@@ -16,7 +16,7 @@ string GetLocalCacheDir()
     if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
     return dir;
 }
-string cachedCredentialsFileName = Path.Combine(GetLocalCacheDir(), "cache.json");
+string cachedCredentialsFileName = Path.Combine(GetLocalCacheDir(), ".1e6a6726-d10e-4c8e-a140-d6e069bbce09.json");
 
 IConfiguration Configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)

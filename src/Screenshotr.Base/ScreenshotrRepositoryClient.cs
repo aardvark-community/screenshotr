@@ -106,7 +106,8 @@ public class ScreenshotrRepositoryClient : IScreenshotrApi
             isDeletable: true
             );
 
-        _repo = _repo with { ApiKeys = _repo.ApiKeys.Add(k) };
+        _repo = (_repo with { ApiKeys = _repo.ApiKeys.Add(k) }).SaveApiKeys();
+
         return Task.FromResult(new ApiCreateApiKeyResponse(k));
     }
 
@@ -114,7 +115,9 @@ public class ScreenshotrRepositoryClient : IScreenshotrApi
     {
         if (_repo.ApiKeys.Keys.TryGetValue(request.ApiKeyToDelete, out var x))
         {
-            _repo = _repo with { ApiKeys = _repo.ApiKeys.Remove(request.ApiKeyToDelete) };
+            _repo = 
+                (_repo with { ApiKeys = _repo.ApiKeys.Remove(request.ApiKeyToDelete) })
+                .SaveApiKeys();
             return Task.FromResult(new ApiDeleteApiKeyResponse(x));
         }
         else
