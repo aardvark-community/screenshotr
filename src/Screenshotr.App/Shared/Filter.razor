@@ -30,15 +30,53 @@
             @if (App.Model.Filter.SelectedUsers.Contains(user))
             {
                 <span class="badge bg-primary" style="margin-right: 0.2em; cursor: pointer;"
-              @onclick="() => App.Dispatch(ScreenshotrApp.MessageType.ToggleSelectedUser, user)">
+                    @onclick="() => App.Dispatch(ScreenshotrApp.MessageType.ToggleSelectedUser, user)">
                     <span>@user (@count)</span>
                 </span>
             }
             else
             {
                 <span class="badge bg-light text-dark" style="margin-right: 0.2em; cursor: pointer;"
-              @onclick="() => App.Dispatch(ScreenshotrApp.MessageType.ToggleSelectedUser, user)">
+                    @onclick="() => App.Dispatch(ScreenshotrApp.MessageType.ToggleSelectedUser, user)">
                     <span>@user (@count)</span>
+                </span>
+            }
+        }
+    </div>
+    <div>
+        @foreach (var (hostname, count) in App.Model.Filter.FilteredHostnames)
+        {
+            @if (App.Model.Filter.SelectedHostnames.Contains(hostname))
+            {
+                <span class="badge bg-primary" style="margin-right: 0.2em; cursor: pointer;"
+                    @onclick="() => App.Dispatch(ScreenshotrApp.MessageType.ToggleSelectedHostname, hostname)">
+                    <span>@hostname (@count)</span>
+                </span>
+            }
+            else
+            {
+                <span class="badge bg-light text-dark" style="margin-right: 0.2em; cursor: pointer;"
+                    @onclick="() => App.Dispatch(ScreenshotrApp.MessageType.ToggleSelectedHostname, hostname)">
+                    <span>@hostname (@count)</span>
+                </span>
+            }
+        }
+    </div>
+    <div>
+        @foreach (var (process, count) in App.Model.Filter.FilteredProcesses)
+        {
+            @if (App.Model.Filter.SelectedProcesses.Contains(process))
+            {
+                <span class="badge bg-primary" style="margin-right: 0.2em; cursor: pointer;"
+                    @onclick="() => App.Dispatch(ScreenshotrApp.MessageType.ToggleSelectedProcess, process)">
+                    <span>@process (@count)</span>
+                </span>
+            }
+            else
+            {
+                <span class="badge bg-light text-dark" style="margin-right: 0.2em; cursor: pointer;"
+                    @onclick="() => App.Dispatch(ScreenshotrApp.MessageType.ToggleSelectedProcess, process)">
+                    <span>@process (@count)</span>
                 </span>
             }
         }

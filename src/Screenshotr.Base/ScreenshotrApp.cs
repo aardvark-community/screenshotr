@@ -54,6 +54,8 @@ public class ScreenshotrApp : ElmApp<ScreenshotrModel, ScreenshotrApp.MessageTyp
         ToggleSelectedTag,
         ToggleSelectedYear,
         ToggleSelectedUser,
+        ToggleSelectedHostname,
+        ToggleSelectedProcess,
 
         RemoveScreenshotTag,
         EditScreenshotTagStart,
@@ -100,20 +102,32 @@ public class ScreenshotrApp : ElmApp<ScreenshotrModel, ScreenshotrApp.MessageTyp
 
             case MessageType.ToggleSelectedTag:
                 {
-                    var tag = message.GetArgument<string>();
-                    m = m with { Filter = m.Filter.ToggleSelectedTag(tag) };
+                    var x = message.GetArgument<string>();
+                    m = m with { Filter = m.Filter.ToggleSelectedTag(x) };
                     break;
                 }
             case MessageType.ToggleSelectedYear:
                 {
-                    var year = message.GetArgument<int>();
-                    m = m with { Filter = m.Filter.ToggleSelectedYear(year) };
+                    var x = message.GetArgument<int>();
+                    m = m with { Filter = m.Filter.ToggleSelectedYear(x) };
                     break;
                 }
             case MessageType.ToggleSelectedUser:
                 {
-                    var user = message.GetArgument<string>();
-                    m = m with { Filter = m.Filter.ToggleSelectedUser(user) };
+                    var x = message.GetArgument<string>();
+                    m = m with { Filter = m.Filter.ToggleSelectedUser(x) };
+                    break;
+                }
+            case MessageType.ToggleSelectedHostname:
+                {
+                    var x = message.GetArgument<string>();
+                    m = m with { Filter = m.Filter.ToggleSelectedHostname(x) };
+                    break;
+                }
+            case MessageType.ToggleSelectedProcess:
+                {
+                    var x = message.GetArgument<string>();
+                    m = m with { Filter = m.Filter.ToggleSelectedProcess(x) };
                     break;
                 }
 
