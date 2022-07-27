@@ -18,11 +18,13 @@ public enum FilterSortingMode
 public record IndexedScreenshots(
     ImmutableDictionary<string, Screenshot> All,
     ImmutableDictionary<string, ImmutableDictionary<string, Screenshot>> PerTag,
+    ImmutableDictionary<string, ImmutableDictionary<string, Screenshot>> PerUser,
     ImmutableDictionary<int, ImmutableDictionary<string, Screenshot>> PerYear
     )
 {
     public static readonly IndexedScreenshots Empty = new(
         ImmutableDictionary<string, Screenshot>.Empty,
+        ImmutableDictionary<string, ImmutableDictionary<string, Screenshot>>.Empty,
         ImmutableDictionary<string, ImmutableDictionary<string, Screenshot>>.Empty,
         ImmutableDictionary<int, ImmutableDictionary<string, Screenshot>>.Empty
         );
@@ -30,8 +32,9 @@ public record IndexedScreenshots(
     public static IndexedScreenshots Create(ImmutableDictionary<string, Screenshot> all)
     {
         var perTag = all.Values.SelectMany(x => x.Tags.Select(tag => (tag, x))).GroupBy(x => x.tag).ToImmutableDictionary(g => g.Key, g => g.ToImmutableDictionary(x => x.x.Id, x => x.x));
+        var perUser = all.Values.GroupBy(x => x.ImportInfo.Username).ToImmutableDictionary(g => g.Key, g => g.ToImmutableDictionary(x => x.Id));
         var perYear = all.Values.GroupBy(x => x.Year).ToImmutableDictionary(g => g.Key, g => g.ToImmutableDictionary(x => x.Id));
-        return new(all, perTag, perYear);
+        return new(all, perTag, perUser, perYear);
     }
 
     public int Count => All.Count;
@@ -131,6 +134,7 @@ public record IndexedScreenshots(
 
 public record Filter(
     IndexedScreenshots AllScreenshots,
+    ImmutableHashSet<string> SelectedUsers,
     ImmutableHashSet<string> SelectedTags,
     ImmutableHashSet<int> SelectedYears,
     FilterSortingMode SortingMode,
@@ -139,6 +143,7 @@ public record Filter(
 {
     public static Filter Empty = new Filter(
         AllScreenshots: IndexedScreenshots.Empty,
+        SelectedUsers: ImmutableHashSet<string>.Empty,
         SelectedTags: ImmutableHashSet<string>.Empty,
         SelectedYears: ImmutableHashSet<int>.Empty,
         SortingMode: FilterSortingMode.CreatedDescending,
@@ -150,6 +155,8 @@ public record Filter(
 
     public IEnumerable<(string, int)> FilteredTags => _cacheFilteredTags;
 
+    public IEnumerable<(string, int)> FilteredUsers => _cacheFilteredUsers;
+
     public ImmutableList<(int, int)> FilteredYears => _cacheFilteredYears;
 
     public int CountAll => AllScreenshots.Count;
@@ -158,22 +165,23 @@ public record Filter(
 
     public static Filter Create(ImmutableDictionary<string, Screenshot> allScreenshots, FilterSortingMode sortingMode, int take)
     {
-        var allTags = allScreenshots.Values
-            .AsParallel()
-            .SelectMany(x => x.Tags.Select(tag => (Tag: tag, Screenshot: x)))
-            .GroupBy(x => x.Tag)
-            .ToImmutableDictionary(g => g.Key, g => g.ToImmutableDictionary(x => x.Screenshot.Id, x => x.Screenshot))
-            ;
+        //var allTags = allScreenshots.Values
+        //    .AsParallel()
+        //    .SelectMany(x => x.Tags.Select(tag => (Tag: tag, Screenshot: x)))
+        //    .GroupBy(x => x.Tag)
+        //    .ToImmutableDictionary(g => g.Key, g => g.ToImmutableDictionary(x => x.Screenshot.Id, x => x.Screenshot))
+        //    ;
 
-        var allYears = allScreenshots.Values
-            .AsParallel()
-            .Select(x => (x.Created.Year, Screenshot: x))
-            .GroupBy(x => x.Year)
-            .ToImmutableDictionary(g => g.Key, g => g.ToImmutableDictionary(x => x.Screenshot.Id, x => x.Screenshot))
-            ;
+        //var allYears = allScreenshots.Values
+        //    .AsParallel()
+        //    .Select(x => (x.Created.Year, Screenshot: x))
+        //    .GroupBy(x => x.Year)
+        //    .ToImmutableDictionary(g => g.Key, g => g.ToImmutableDictionary(x => x.Screenshot.Id, x => x.Screenshot))
+        //    ;
 
         var self = new Filter(
             AllScreenshots: IndexedScreenshots.Create(allScreenshots),
+            SelectedUsers: ImmutableHashSet<string>.Empty,
             SelectedTags: ImmutableHashSet<string>.Empty,
             SelectedYears: ImmutableHashSet<int>.Empty,
             SortingMode: sortingMode,
@@ -183,12 +191,16 @@ public record Filter(
         return self.ComputeCache();
     }
 
-    public Filter ToggleSelectedYear(int year) =>
-        (this with { SelectedYears = SelectedYears.Contains(year) ? SelectedYears.Remove(year) : SelectedYears.Add(year) })
+    public Filter ToggleSelectedYear(int x) =>
+        (this with { SelectedYears = SelectedYears.Contains(x) ? SelectedYears.Remove(x) : SelectedYears.Add(x) })
         .ComputeCache();
 
-    public Filter ToggleSelectedTag(string tag) =>
-        (this with { SelectedTags = SelectedTags.Contains(tag) ? SelectedTags.Remove(tag) : SelectedTags.Add(tag) })
+    public Filter ToggleSelectedTag(string x) =>
+        (this with { SelectedTags = SelectedTags.Contains(x) ? SelectedTags.Remove(x) : SelectedTags.Add(x) })
+        .ComputeCache();
+
+    public Filter ToggleSelectedUser(string x) =>
+        (this with { SelectedUsers = SelectedUsers.Contains(x) ? SelectedUsers.Remove(x) : SelectedUsers.Add(x) })
         .ComputeCache();
 
     public Filter UpsertScreenshot(Screenshot screenshot) =>
@@ -202,6 +214,9 @@ public record Filter(
 
             if (SelectedYears.Count > 0)
                 xs = xs.Where(x => SelectedYears.Contains(x.Created.Year));
+
+            if (SelectedUsers.Count > 0)
+                xs = xs.Where(x => SelectedUsers.Contains(x.ImportInfo.Username));
 
             if (SelectedTags.Count > 0)
                 xs = xs.Where(x => x.Tags.Any(SelectedTags.Contains));
@@ -241,6 +256,21 @@ public record Filter(
         }
 
         {
+            var users = AllScreenshots.PerUser.Keys;
+
+            var xs = SelectedYears.IsEmpty
+                ? users.AsParallel().Select(user => (user, count: AllScreenshots.PerUser[user].Count))
+                : users.AsParallel().Select(user => (user, count: AllScreenshots.PerUser[user].Count(x => SelectedUsers.Contains(x.Value.ImportInfo.Username))))
+                ;
+
+            xs = xs
+                .Where(x => x.count > 0 || SelectedTags.Contains(x.user))
+                .OrderBy(x => x.user);
+
+            _cacheFilteredUsers = xs.ToImmutableList();
+        }
+
+        {
             var years = AllScreenshots.PerYear.Keys;
 
             var xs = SelectedTags.IsEmpty
@@ -260,5 +290,6 @@ public record Filter(
 
     private ImmutableList<Screenshot> _cacheFilteredScreenshots = null!;
     private ImmutableList<(string, int)> _cacheFilteredTags = null!;
+    private ImmutableList<(string, int)> _cacheFilteredUsers = null!;
     private ImmutableList<(int, int)> _cacheFilteredYears = null!;
 }

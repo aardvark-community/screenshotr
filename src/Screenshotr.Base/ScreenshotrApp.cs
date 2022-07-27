@@ -53,6 +53,7 @@ public class ScreenshotrApp : ElmApp<ScreenshotrModel, ScreenshotrApp.MessageTyp
 
         ToggleSelectedTag,
         ToggleSelectedYear,
+        ToggleSelectedUser,
 
         RemoveScreenshotTag,
         EditScreenshotTagStart,
@@ -107,6 +108,12 @@ public class ScreenshotrApp : ElmApp<ScreenshotrModel, ScreenshotrApp.MessageTyp
                 {
                     var year = message.GetArgument<int>();
                     m = m with { Filter = m.Filter.ToggleSelectedYear(year) };
+                    break;
+                }
+            case MessageType.ToggleSelectedUser:
+                {
+                    var user = message.GetArgument<string>();
+                    m = m with { Filter = m.Filter.ToggleSelectedUser(user) };
                     break;
                 }
 
