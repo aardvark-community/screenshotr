@@ -347,6 +347,7 @@ public record Filter(
             _cacheFilteredScreenshots = xs.ToImmutableList();
         }
 
+        // tags
         {
             var tags = AllScreenshots.PerTag.Keys;
 
@@ -362,6 +363,7 @@ public record Filter(
             _cacheFilteredTags = xs.ToImmutableList();
         }
 
+        // years
         {
             var years = AllScreenshots.PerYear.Keys;
 
@@ -377,12 +379,13 @@ public record Filter(
             _cacheFilteredYears = xs.ToImmutableList();
         }
 
+        // users
         {
-            var keys = AllScreenshots.PerUser.Keys;
+            var users = AllScreenshots.PerUser.Keys;
 
-            var xs = SelectedUsers.IsEmpty
-                ? keys.AsParallel().Select(user => (user, count: AllScreenshots.PerUser[user].Count))
-                : keys.AsParallel().Select(user => (user, count: AllScreenshots.PerUser[user].Count(x => SelectedUsers.Contains(x.Value.ImportInfo.Username))))
+            var xs = SelectedTags.IsEmpty
+                ? users.AsParallel().Select(user => (user, count: AllScreenshots.PerUser[user].Count))
+                : users.AsParallel().Select(user => (user, count: AllScreenshots.PerUser[user].Count(x => x.Value.Tags.Any(SelectedTags.Contains))))
                 ;
 
             xs = xs
@@ -392,12 +395,13 @@ public record Filter(
             _cacheFilteredUsers = xs.ToImmutableList();
         }
 
+        // hostnames
         {
-            var keys = AllScreenshots.PerHostname.Keys;
+            var hostnames = AllScreenshots.PerHostname.Keys;
 
-            var xs = SelectedHostnames.IsEmpty
-                ? keys.AsParallel().Select(hostname => (hostname, count: AllScreenshots.PerHostname[hostname].Count))
-                : keys.AsParallel().Select(hostname => (hostname, count: AllScreenshots.PerHostname[hostname].Count(x => SelectedHostnames.Contains(x.Value.ImportInfo.Hostname))))
+            var xs = SelectedTags.IsEmpty
+                ? hostnames.AsParallel().Select(hostname => (hostname, count: AllScreenshots.PerHostname[hostname].Count))
+                : hostnames.AsParallel().Select(hostname => (hostname, count: AllScreenshots.PerHostname[hostname].Count(x => x.Value.Tags.Any(SelectedTags.Contains))))
                 ;
 
             xs = xs
@@ -407,12 +411,13 @@ public record Filter(
             _cacheFilteredHostnames = xs.ToImmutableList();
         }
 
+        // processes
         {
-            var keys = AllScreenshots.PerProcess.Keys;
+            var processes = AllScreenshots.PerProcess.Keys;
 
-            var xs = SelectedProcesses.IsEmpty
-                ? keys.AsParallel().Select(process => (process, count: AllScreenshots.PerProcess[process].Count))
-                : keys.AsParallel().Select(process => (process, count: AllScreenshots.PerProcess[process].Count(x => SelectedProcesses.Contains(x.Value.ImportInfo.Process))))
+            var xs = SelectedTags.IsEmpty
+                ? processes.AsParallel().Select(process => (process, count: AllScreenshots.PerProcess[process].Count))
+                : processes.AsParallel().Select(process => (process, count: AllScreenshots.PerProcess[process].Count(x => x.Value.Tags.Any(SelectedTags.Contains))))
                 ;
 
             xs = xs
