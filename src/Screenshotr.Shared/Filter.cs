@@ -356,6 +356,18 @@ public record Filter(
                 : tags.AsParallel().Select(tag => (tag, count: AllScreenshots.PerTag[tag].Count(x => SelectedYears.Contains(x.Value.Created.Year))))
                 ;
 
+            if (SelectedUsers.Count > 0)
+            {
+                xs = xs.AsParallel().Select(x => (x.tag, count: AllScreenshots.PerTag[x.tag].Count(x => SelectedUsers.Contains(x.Value.ImportInfo.Username))));
+            }
+            if (SelectedHostnames.Count > 0)
+            {
+                xs = xs.AsParallel().Select(x => (x.tag, count: AllScreenshots.PerTag[x.tag].Count(x => SelectedHostnames.Contains(x.Value.ImportInfo.Hostname))));
+            }
+            if (SelectedProcesses.Count > 0)
+            {
+                xs = xs.AsParallel().Select(x => (x.tag, count: AllScreenshots.PerTag[x.tag].Count(x => SelectedProcesses.Contains(x.Value.ImportInfo.Process))));
+            }
             xs = xs
                 .Where(x => x.count > 0 || SelectedTags.Contains(x.tag))
                 .OrderBy(x => x.tag);
