@@ -1,7 +1,9 @@
 ﻿@inject ScreenshotrApp App
 
 <div>
+  <ul class="list-group">
 
+    <li class="list-group-item">
     <div>
     @foreach (var (year, count) in App.Model.Filter.FilteredYears)
     {
@@ -23,7 +25,9 @@
         }
     }
     </div>
+    </li>
 
+    <li class="list-group-item">
     <div>
         @foreach (var (user, count) in App.Model.Filter.FilteredUsers)
         {
@@ -43,6 +47,9 @@
             }
         }
     </div>
+    </li>
+
+    <li class="list-group-item">
     <div>
         @foreach (var (hostname, count) in App.Model.Filter.FilteredHostnames)
         {
@@ -62,7 +69,10 @@
             }
         }
     </div>
-    <div>
+    </li>
+
+        <li class="list-group-item">
+            <div>
         @foreach (var (process, count) in App.Model.Filter.FilteredProcesses)
         {
             @if (App.Model.Filter.SelectedProcesses.Contains(process))
@@ -81,29 +91,33 @@
             }
         }
     </div>
+    </li>
 
+    <li class="list-group-item">
     <div>
-    @foreach (var (tag, count) in App.Model.Filter.FilteredTags)
-    {
-        @if (App.Model.Filter.SelectedTags.Contains(tag))
+        @foreach (var (tag, count) in App.Model.Filter.FilteredTags)
         {
-            <span class="badge bg-primary" style="margin-right: 0.2em; cursor: pointer;"
-                @onclick="() => App.Dispatch(ScreenshotrApp.MessageType.ToggleSelectedTag, tag)"
-                >
-                <span>@tag (@count)</span>
-            </span>
+            @if (App.Model.Filter.SelectedTags.Contains(tag))
+            {
+                <span class="badge bg-primary" style="margin-right: 0.2em; cursor: pointer;"
+                    @onclick="() => App.Dispatch(ScreenshotrApp.MessageType.ToggleSelectedTag, tag)"
+                    >
+                    <span>@tag (@count)</span>
+                </span>
+            }
+            else
+            {
+                <span class="badge bg-light text-dark" style="margin-right: 0.2em; cursor: pointer;"
+                    @onclick="() => App.Dispatch(ScreenshotrApp.MessageType.ToggleSelectedTag, tag)"
+                    >
+                    <span>@tag (@count)</span>
+                </span>
+            }
         }
-        else
-        {
-            <span class="badge bg-light text-dark" style="margin-right: 0.2em; cursor: pointer;"
-                @onclick="() => App.Dispatch(ScreenshotrApp.MessageType.ToggleSelectedTag, tag)"
-                >
-                <span>@tag (@count)</span>
-            </span>
-        }
-    }
     </div>
-        
+    </li>
+
+   </ul>  
 </div>
 
 @code {
