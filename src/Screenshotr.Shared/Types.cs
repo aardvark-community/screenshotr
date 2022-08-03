@@ -111,7 +111,7 @@ public record ApiKeys(IImmutableDictionary<string, ApiKey> Keys)
     }
 }
 
-public record V2i(int X, int Y);
+public record ImgSize(int X, int Y);
 
 public record ImportInfo(string Username, string Hostname, string Process, string OsVersion, string ClrVersion)
 {

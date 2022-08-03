@@ -2,7 +2,7 @@
   "profiles": {
     "Screenshotr.App": {
       "commandName": "Project",
-      "commandLineArgs": "Screenshotr:Data=E:/screenshotr/testrepo2",
+      "commandLineArgs": "Screenshotr:Data=C:/tmp/testrepo2",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
