@@ -104,7 +104,7 @@ public record Repository
 
             var info = Image.Identify(buffer);
             if (info == null) return (this, null, false);
-            var size = new V2i(info.Width, info.Height);
+            var size = new ImgSize(info.Width, info.Height);
 
             var screenshot = new Screenshot(
                 Id: id,

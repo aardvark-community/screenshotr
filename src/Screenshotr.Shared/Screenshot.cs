@@ -43,7 +43,7 @@ public record Screenshot(
     string Id,
     DateTimeOffset Created,
     long Bytes,
-    V2i Size,
+    ImgSize Size,
     ImmutableHashSet<string> Tags,
     Custom Custom,
     ImportInfo ImportInfo
