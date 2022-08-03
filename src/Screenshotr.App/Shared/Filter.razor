@@ -10,7 +10,7 @@
             <span class="badge bg-primary" style="margin-right: 0.2em; cursor: pointer;"
                 @onclick="() => App.Dispatch(ScreenshotrApp.MessageType.ToggleSelectedYear, year)"
                 >
-                <span>@year (@count)</span>
+                <span><i class="bi bi-clock" style="margin-right: 0.3em;"></i>@year (@count)</span>
             </span>
         }
         else
@@ -18,7 +18,7 @@
             <span class="badge bg-light text-dark" style="margin-right: 0.2em; cursor: pointer;"
                 @onclick="() => App.Dispatch(ScreenshotrApp.MessageType.ToggleSelectedYear, year)"
                 >
-                <span>@year (@count)</span>
+                <span><i class="bi bi-clock" style="margin-right: 0.3em;"></i>@year (@count)</span>
             </span>
         }
     }
@@ -31,14 +31,14 @@
             {
                 <span class="badge bg-primary" style="margin-right: 0.2em; cursor: pointer;"
                     @onclick="() => App.Dispatch(ScreenshotrApp.MessageType.ToggleSelectedUser, user)">
-                    <span>@user (@count)</span>
+                    <span><i class="bi bi-person" style="margin-right: 0.3em;"></i>@user (@count)</span>
                 </span>
             }
             else
             {
                 <span class="badge bg-light text-dark" style="margin-right: 0.2em; cursor: pointer;"
                     @onclick="() => App.Dispatch(ScreenshotrApp.MessageType.ToggleSelectedUser, user)">
-                    <span>@user (@count)</span>
+                    <span><i class="bi bi-person" style="margin-right: 0.3em;"></i>@user (@count)</span>
                 </span>
             }
         }
@@ -50,14 +50,14 @@
             {
                 <span class="badge bg-primary" style="margin-right: 0.2em; cursor: pointer;"
                     @onclick="() => App.Dispatch(ScreenshotrApp.MessageType.ToggleSelectedHostname, hostname)">
-                    <span>@hostname (@count)</span>
+                    <span><i class="bi bi-laptop" style="margin-right: 0.3em;"></i>@hostname (@count)</span>
                 </span>
             }
             else
             {
                 <span class="badge bg-light text-dark" style="margin-right: 0.2em; cursor: pointer;"
                     @onclick="() => App.Dispatch(ScreenshotrApp.MessageType.ToggleSelectedHostname, hostname)">
-                    <span>@hostname (@count)</span>
+                    <span><i class="bi bi-laptop" style="margin-right: 0.3em;"></i>@hostname (@count)</span>
                 </span>
             }
         }
@@ -69,14 +69,14 @@
             {
                 <span class="badge bg-primary" style="margin-right: 0.2em; cursor: pointer;"
                     @onclick="() => App.Dispatch(ScreenshotrApp.MessageType.ToggleSelectedProcess, process)">
-                    <span>@process (@count)</span>
+                    <span><i class="bi bi-code-square" style="margin-right: 0.3em;"></i>@process (@count)</span>
                 </span>
             }
             else
             {
                 <span class="badge bg-light text-dark" style="margin-right: 0.2em; cursor: pointer;"
                     @onclick="() => App.Dispatch(ScreenshotrApp.MessageType.ToggleSelectedProcess, process)">
-                    <span>@process (@count)</span>
+                    <span><i class="bi bi-code-square" style="margin-right: 0.3em;"></i>@process (@count)</span>
                 </span>
             }
         }
