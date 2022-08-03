@@ -1,4 +1,6 @@
 ﻿@inject ScreenshotrApp App
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor httpContextAccessor
 
 <div>
   <span class="badge rounded-pill bg-info">
@@ -12,10 +14,21 @@
   <span class="badge rounded-pill bg-info">
       @App.Model.Filter.CountFiltered.ToString("N0") filtered
   </span>
+
+  <span style="font-size:0.75em">
+        @_displayName
+  </span>
+
 </div>
 
 @code {
-	private void Update() => InvokeAsync(this.StateHasChanged);
-    protected override void OnInitialized() => App.OnChange += Update;
+    private string _displayName = "";
+
+    private void Update() => InvokeAsync(this.StateHasChanged);
+    protected override void OnInitialized()
+    {
+        App.OnChange += Update;
+        _displayName = ((string)httpContextAccessor?.HttpContext?.Request.Headers["X-Display-Name"]) ?? "";
+    }
     public void Dispose() => App.OnChange -= Update;
 }

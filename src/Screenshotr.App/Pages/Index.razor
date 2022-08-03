@@ -1,14 +1,33 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor httpContextAccessor
 @inject ScreenshotrApp App
 
 <PageTitle>Screenshotr</PageTitle>
+@*<p>UserAgent = @_userAgent</p>
+<p>IPAddress = @_ipAddress</p>
+<p>DisplayName = @_displayName</p>
+<p>ForwardedUser = @_forwardedUser</p>*@
 <Filter></Filter>
 <Gallery></Gallery>
 
 
 @code
 {
+    //private string _userAgent;
+    //private string _ipAddress;
+    //private string _displayName;
+    //private string _forwardedUser;
+
 	private void Update() => InvokeAsync(this.StateHasChanged);
-    protected override void OnInitialized() => App.OnChange += Update;
+    protected override void OnInitialized() 
+    {
+        App.OnChange += Update;
+
+        //_userAgent = httpContextAccessor.HttpContext.Request.Headers["User-Agent"];
+        //_ipAddress = httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString();
+        //_displayName = httpContextAccessor.HttpContext.Request.Headers["X-Display-Name"];
+        //_forwardedUser = httpContextAccessor.HttpContext.Request.Headers["X-Forwarded-User"];
+    }
     public void Dispose() => App.OnChange -= Update;
 }

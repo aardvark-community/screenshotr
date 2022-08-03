@@ -1,9 +1,12 @@
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.FileProviders;
 using Screenshotr;
+using System.Net;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,19 +34,34 @@ builder.Services.AddResponseCompression(opts =>
         new[] { "application/octet-stream" });
 });
 
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(builder =>
-        builder.WithOrigins("https://*.aardworx.net")
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials()
-            .WithExposedHeaders("*")
-            );
-});
+//builder.Services.AddCors(options =>
+//{
+//    options.AddDefaultPolicy(builder =>
+//        builder.WithOrigins("https://*.aardworx.net")
+//            .AllowAnyMethod()
+//            .AllowAnyHeader()
+//            .AllowCredentials()
+//            .WithExposedHeaders("*")
+//            );
+//});
+//builder.Services.AddHttpLogging(options =>
+//{
+//    options.LoggingFields = Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.All;
 
+//    options.RequestHeaders.Add("X-Display-Name");
+//    options.RequestHeaders.Add("X-Forwarded-User");
+//    options.RequestHeaders.Add("Cookie");
+//});
+//builder.Services.Configure<ForwardedHeadersOptions>(options =>
+//{
+//    options.ForwardedHeaders = ForwardedHeaders.All;
+//    //options.KnownProxies.Add(IPAddress.Parse("172.18.0.3"));
+//});
+
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
+//app.UseForwardedHeaders();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -60,7 +78,8 @@ app.UseStaticFiles(new StaticFileOptions
 });
 
 app.UseRouting();
-app.UseCors();
+//app.UseCors();
+//app.UseHttpLogging();
 
 void RegisterApi<T, R>(string path, Func<T, Task<R>> handler, string? role = default)
 {
@@ -73,16 +92,22 @@ void RegisterApi<T, R>(string path, Func<T, Task<R>> handler, string? role = def
     });
 }
 
-RegisterApi<ApiGetStatusRequest              , ApiGetStatusResponse              >(Global.ApiPathStatus            , screenshotrService.GetStatus                               );
-RegisterApi<ApiGetScreenshotsSegmentedRequest, ApiGetScreenshotsSegmentedResponse>(Global.ApiPathScreenshotsSegment, screenshotrService.GetScreenshotsSegmented                 );
-RegisterApi<ApiImportScreenshotRequest       , ApiImportScreenshotResponse       >(Global.ApiPathScreenshotsImport , screenshotrService.ImportScreenshot       , Roles.Importer );
-RegisterApi<ApiUpdateScreenshotRequest       , ApiUpdateScreenshotResponse       >(Global.ApiPathScreenshotsUpdate , screenshotrService.UpdateScreenshot                        );
-RegisterApi<ApiGetScreenshotRequest          , ApiGetScreenshotResponse          >(Global.ApiPathScreenshotsGet    , screenshotrService.GetScreenshot                           );
-RegisterApi<ApiCreateApiKeyRequest           , ApiCreateApiKeyResponse           >(Global.ApiPathApiKeysGenerate   , screenshotrService.CreateApiKey           , Roles.Admin    );
-RegisterApi<ApiDeleteApiKeyRequest           , ApiDeleteApiKeyResponse           >(Global.ApiPathApiKeysDelete     , screenshotrService.DeleteApiKey           , Roles.Admin    );
-RegisterApi<ApiListApiKeysRequest            , ApiListApiKeysResponse            >(Global.ApiPathApiKeysList       , screenshotrService.ListApiKeys            , Roles.Admin    );
+RegisterApi<ApiGetStatusRequest, ApiGetStatusResponse>(Global.ApiPathStatus, screenshotrService.GetStatus);
+RegisterApi<ApiGetScreenshotsSegmentedRequest, ApiGetScreenshotsSegmentedResponse>(Global.ApiPathScreenshotsSegment, screenshotrService.GetScreenshotsSegmented);
+RegisterApi<ApiImportScreenshotRequest, ApiImportScreenshotResponse>(Global.ApiPathScreenshotsImport, screenshotrService.ImportScreenshot, Roles.Importer);
+RegisterApi<ApiUpdateScreenshotRequest, ApiUpdateScreenshotResponse>(Global.ApiPathScreenshotsUpdate, screenshotrService.UpdateScreenshot);
+RegisterApi<ApiGetScreenshotRequest, ApiGetScreenshotResponse>(Global.ApiPathScreenshotsGet, screenshotrService.GetScreenshot);
+RegisterApi<ApiCreateApiKeyRequest, ApiCreateApiKeyResponse>(Global.ApiPathApiKeysGenerate, screenshotrService.CreateApiKey, Roles.Admin);
+RegisterApi<ApiDeleteApiKeyRequest, ApiDeleteApiKeyResponse>(Global.ApiPathApiKeysDelete, screenshotrService.DeleteApiKey, Roles.Admin);
+RegisterApi<ApiListApiKeysRequest, ApiListApiKeysResponse>(Global.ApiPathApiKeysList, screenshotrService.ListApiKeys, Roles.Admin);
 
-app.MapGet("/test", () => "test");
+//app.MapGet("/test", (HttpContext context) =>
+//{
+//    foreach (var h in context.Request.Headers)
+//    {
+//        Console.WriteLine($"[DEBUG DEBUG DEBUG] {JsonSerializer.Serialize(h)}");
+//    }
+//});
 
 app.MapBlazorHub();
 app.MapHub<ScreenshotrHub>("/screenshotrhub");
