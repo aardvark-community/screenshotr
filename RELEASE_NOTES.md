@@ -1,3 +1,6 @@
+### 1.4.0
+- renamed type Screenshotr.V2i to Screenshotr.ImgSize to avoid name clashes
+
 ### 1.3.0
 - add API keys
   - upload now requires an apikey with role `importer`
