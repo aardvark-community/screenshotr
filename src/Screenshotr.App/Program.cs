@@ -31,6 +31,18 @@ builder.Services.AddResponseCompression(opts =>
         new[] { "application/octet-stream" });
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(builder =>
+        builder.WithOrigins("https://*.aardworx.net")
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials()
+            .WithExposedHeaders("*")
+            );
+});
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -48,6 +60,7 @@ app.UseStaticFiles(new StaticFileOptions
 });
 
 app.UseRouting();
+app.UseCors();
 
 void RegisterApi<T, R>(string path, Func<T, Task<R>> handler, string? role = default)
 {
@@ -68,6 +81,8 @@ RegisterApi<ApiGetScreenshotRequest          , ApiGetScreenshotResponse         
 RegisterApi<ApiCreateApiKeyRequest           , ApiCreateApiKeyResponse           >(Global.ApiPathApiKeysGenerate   , screenshotrService.CreateApiKey           , Roles.Admin    );
 RegisterApi<ApiDeleteApiKeyRequest           , ApiDeleteApiKeyResponse           >(Global.ApiPathApiKeysDelete     , screenshotrService.DeleteApiKey           , Roles.Admin    );
 RegisterApi<ApiListApiKeysRequest            , ApiListApiKeysResponse            >(Global.ApiPathApiKeysList       , screenshotrService.ListApiKeys            , Roles.Admin    );
+
+app.MapGet("/test", () => "test");
 
 app.MapBlazorHub();
 app.MapHub<ScreenshotrHub>("/screenshotrhub");
