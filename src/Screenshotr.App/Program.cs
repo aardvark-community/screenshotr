@@ -13,6 +13,18 @@ var builder = WebApplication.CreateBuilder(args);
 Console.WriteLine($"[ScreenshotrService] init ...");
 var screenshotrBaseDir = builder.Configuration["Screenshotr:Data"];
 Console.WriteLine($"[ScreenshotrService]     Screenshotr:Data={screenshotrBaseDir}");
+var corsOrigins = builder.Configuration["Screenshotr:CorsOrigins"];
+Console.WriteLine($"[ScreenshotrService]     Screenshotr:CorsOrigins={corsOrigins}");
+bool.TryParse(builder.Configuration["Screenshotr:EnableHttpLogging"], out var enableHttpLogging);
+Console.WriteLine($"[ScreenshotrService]     Screenshotr:EnableHttpLogging={enableHttpLogging}");
+
+var httpHeaderUserId = builder.Configuration["Screenshotr:HttpHeaderUserId"];
+Console.WriteLine($"[ScreenshotrService]     Screenshotr:HttpHeaderUserId={httpHeaderUserId}");
+var httpHeaderUserName = builder.Configuration["Screenshotr:HttpHeaderUserName"];
+Console.WriteLine($"[ScreenshotrService]     Screenshotr:HttpHeaderUserName={httpHeaderUserName}");
+var httpHeaderDisplayName = builder.Configuration["Screenshotr:HttpHeaderDisplayName"];
+Console.WriteLine($"[ScreenshotrService]     Screenshotr:HttpHeaderDisplayName={httpHeaderDisplayName}");
+
 screenshotrBaseDir = Path.GetFullPath(screenshotrBaseDir);
 var repo = Repository.Init(screenshotrBaseDir);
 var screenshotrService = new ScreenshotrRepositoryClient(repo);
@@ -21,7 +33,6 @@ Console.WriteLine($"[ScreenshotrService]     version {status.Version}");
 Console.WriteLine($"[ScreenshotrService]     base directory is {screenshotrBaseDir}");
 Console.WriteLine($"[ScreenshotrService]     found {status.Count} screenshots");
 Console.WriteLine($"[ScreenshotrService]     done");
-
 
 // Add services to the container.
 builder.Services.AddRazorPages();
@@ -34,34 +45,38 @@ builder.Services.AddResponseCompression(opts =>
         new[] { "application/octet-stream" });
 });
 
-//builder.Services.AddCors(options =>
-//{
-//    options.AddDefaultPolicy(builder =>
-//        builder.WithOrigins("https://*.aardworx.net")
-//            .AllowAnyMethod()
-//            .AllowAnyHeader()
-//            .AllowCredentials()
-//            .WithExposedHeaders("*")
-//            );
-//});
-//builder.Services.AddHttpLogging(options =>
-//{
-//    options.LoggingFields = Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.All;
+if (!string.IsNullOrWhiteSpace(corsOrigins))
+{
+    var corsOriginsSplit = corsOrigins.Split(";", StringSplitOptions.TrimEntries);
+    builder.Services.AddCors(options =>
+    {
+        options.AddDefaultPolicy(builder =>
+            //builder.WithOrigins("https://*.aardworx.net")
+            builder.WithOrigins(corsOriginsSplit)
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials()
+                .WithExposedHeaders("*")
+                );
+    });
+}
 
-//    options.RequestHeaders.Add("X-Display-Name");
-//    options.RequestHeaders.Add("X-Forwarded-User");
-//    options.RequestHeaders.Add("Cookie");
-//});
-//builder.Services.Configure<ForwardedHeadersOptions>(options =>
-//{
-//    options.ForwardedHeaders = ForwardedHeaders.All;
-//    //options.KnownProxies.Add(IPAddress.Parse("172.18.0.3"));
-//});
-
+if (enableHttpLogging)
+{
+    builder.Services.AddHttpLogging(options =>
+    {
+        options.LoggingFields = Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.All;
+        if (!string.IsNullOrWhiteSpace(httpHeaderUserId)) options.RequestHeaders.Add(httpHeaderUserId);
+        if (!string.IsNullOrWhiteSpace(httpHeaderUserName)) options.RequestHeaders.Add(httpHeaderUserName);
+        if (!string.IsNullOrWhiteSpace(httpHeaderDisplayName)) options.RequestHeaders.Add(httpHeaderDisplayName);
+        //options.RequestHeaders.Add("X-Display-Name");
+        //options.RequestHeaders.Add("X-Forwarded-User");
+        //options.RequestHeaders.Add("Cookie");
+    });
+}
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
-//app.UseForwardedHeaders();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -78,8 +93,8 @@ app.UseStaticFiles(new StaticFileOptions
 });
 
 app.UseRouting();
-//app.UseCors();
-//app.UseHttpLogging();
+if (corsOrigins != null) app.UseCors();
+if (enableHttpLogging) app.UseHttpLogging();
 
 void RegisterApi<T, R>(string path, Func<T, Task<R>> handler, string? role = default)
 {
