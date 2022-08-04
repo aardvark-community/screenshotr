@@ -2,25 +2,90 @@
 @inject ScreenshotrApp App
 @inject IJSRuntime JSRuntime
 
-<div class="container-fluid"
+<div style="widht: 100%; height: 100%; background-color: black;"
      @ref="imgRef"
      @onclick=OnClick
 >
-    <div class="row">
-        @if (App.Model.CurrentSlideshowIndex >= 0 && App.Model.CurrentSlideshowIndex < App.Model.Filter.FilteredScreenshots.Count)
-        {
-            var current = App.Model.Filter.FilteredScreenshots[App.Model.CurrentSlideshowIndex];
-            <img class="mx-auto"
-                src="@current.RelPathFullRes" 
-                style="max-width: @(current.Size.X)px; max-height: auto;"
-                alt="@current.Id"
-            >
-        }
-        else
-        {
-            <p>empty filter</p>
-        }
-    </div>
+    @if (App.Model.CurrentSlideshowIndex >= 0 && App.Model.CurrentSlideshowIndex < App.Model.Filter.FilteredScreenshots.Count)
+    {
+        var x = App.Model.Filter.FilteredScreenshots[App.Model.CurrentSlideshowIndex];
+        <div style="widht: 100%; height: 100%;">
+            <div style="widht: 100%; height: 80%; background-color:black">
+                <img
+                    src="@x.RelPathFullRes"
+                    style="width: 100%; height: 100%; object-fit: scale-down;"
+                    alt="@x.Id"
+                >
+            </div>
+
+            <div class="d-flex flex-column" style="widht: 100%; height: 20%;">
+
+                <div class="p-2 m-2 d-flex justify-content-center">
+                    @foreach (var tag in GetTagsAndImportInfo(x))
+                    {
+                        @if (App.Model.Filter.SelectedTags.Contains(tag))
+                        {
+                            <span class="badge bg-primary" style="cursor: pointer; margin-right: 0.2em;">
+                                <span>@tag</span>
+                                <i class="bi bi-x" @onclick="() => RemoveTag(x, tag)"></i>
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-light text-dark" style="cursor: pointer; margin-right: 0.2em;">
+                                <span>@tag</span>
+                                <i class="bi bi-x" @onclick="() => RemoveTag(x, tag)"></i>
+                            </span>
+                        }
+                    }
+
+                    @if (App.Model.ActiveTagEditScreenshotId != null && x.Id == App.Model.ActiveTagEditScreenshotId)
+                    {
+                        <div>
+                            <input type="text"
+                           class="form-control-xs border-1 border-primary h-75 w-50 d-inline-block"
+                           id="myEditTag"
+                           @bind-value="LiveTag"
+                           @onkeydown="OnKeyDown"
+                           @ref="_newTagInput" />
+                            <button type="button" class="btn btn-outline-primary border-0 p-0" style="cursor: pointer;" @onclick="EditTagSubmit">
+                                <i class="bi bi-check2"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-primary border-0 p-0" style="cursor: pointer;" @onclick="EditTagCancel">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
+                    }
+                    else
+                    {
+                        <span class="badge bg-light text-dark" style="cursor: pointer;" @onclick="() => EditTagStart(x)">
+                            <i class="bi bi-plus"></i>
+                        </span>
+                    }
+
+                </div>
+
+                <div class="p-2 m-2 d-flex justify-content-center">
+                    <div class="badge bg-light text-dark" style="margin-right: 0.2em;">
+                        @FormatTimestamp(x.Created)
+                    </div>
+                    <div class="badge bg-light text-dark">
+                        <a class="bi bi-arrow-down-circle" href="@x.RelPathFullRes" target="_blank"></a>
+                    </div>
+                </div>
+
+                <div class="p-2 m-2 d-flex justify-content-center">
+                    <div class="pt-1 badge bg-light text-dark" style="margin-right: 0.2em;">@x.Size.X x @x.Size.Y</div>
+                    <div class="badge bg-light text-dark">@FormatBytes(x.Bytes)</div>
+                </div>
+
+            </div>
+        </div>
+    }
+    else
+    {
+        <p>empty filter</p>
+    }
 </div>
 
 
@@ -74,6 +139,17 @@
             .Append(screenshot.ImportInfo.Username)
             .OrderBy(x => x)
             ;
+
+    async Task OnKeyDown(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+        {
+            if (_module == null) throw new Exception("Assertion failed. Module is not initialized.");
+            var result = await _module.InvokeAsync<string>("GetInputText", _newTagInput);
+            LiveTag = result;
+            EditTagSubmit();
+        }
+    }
 
     void RemoveTag(Screenshot screenshot, string tag)
     {

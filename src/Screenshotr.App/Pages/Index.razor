@@ -4,9 +4,9 @@
 @inject ScreenshotrApp App
 
 <PageTitle>Screenshotr</PageTitle>
-<Filter></Filter>
 @if (App.Model.ShowGallery)
 {
+    <Filter></Filter>
     <Gallery></Gallery>
 }
 @if (App.Model.ShowSlideshow)

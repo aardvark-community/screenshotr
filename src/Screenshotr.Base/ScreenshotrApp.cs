@@ -217,6 +217,7 @@ public class ScreenshotrApp : ElmApp<ScreenshotrModel, ScreenshotrApp.MessageTyp
             case MessageType.SetSlideshowIndex:
                 {
                     if (m.ShowSlideshow == false) break;
+                    if (m.ActiveTagEditScreenshotId != null) break;
 
                     var i = message.GetArgument<int>();
                     if (i < 0) i = 0;
