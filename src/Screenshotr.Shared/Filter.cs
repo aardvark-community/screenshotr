@@ -246,12 +246,12 @@ public record Filter(
         )
         .ComputeCache();
 
-    public IEnumerable<Screenshot>    FilteredScreenshots  => _cacheFilteredScreenshots;
-    public IEnumerable<(string, int)> FilteredTags         => _cacheFilteredTags;
-    public IEnumerable<(int, int)>    FilteredYears        => _cacheFilteredYears;
-    public IEnumerable<(string, int)> FilteredUsers        => _cacheFilteredUsers;
-    public IEnumerable<(string, int)> FilteredHostnames    => _cacheFilteredHostnames;
-    public IEnumerable<(string, int)> FilteredProcesses    => _cacheFilteredProcesses;
+    public IReadOnlyList<Screenshot>    FilteredScreenshots  => _cacheFilteredScreenshots;
+    public IReadOnlyList<(string, int)> FilteredTags         => _cacheFilteredTags;
+    public IReadOnlyList<(int, int)>    FilteredYears        => _cacheFilteredYears;
+    public IReadOnlyList<(string, int)> FilteredUsers        => _cacheFilteredUsers;
+    public IReadOnlyList<(string, int)> FilteredHostnames    => _cacheFilteredHostnames;
+    public IReadOnlyList<(string, int)> FilteredProcesses    => _cacheFilteredProcesses;
 
     public int CountAll => AllScreenshots.Count;
 

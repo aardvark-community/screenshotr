@@ -4,8 +4,12 @@
 <div class="container-fluid">
     <div class="row">
 
-        @foreach (var x in App.Model.Filter.FilteredScreenshots.Skip(App.Model.Filter.Skip).Take(App.Model.Filter.Take))
+        @*@foreach (var x in App.Model.Filter.FilteredScreenshots.Skip(App.Model.Filter.Skip).Take(App.Model.Filter.Take))*@
+        @for (var i= 0; i < App.Model.Filter.FilteredScreenshots.Count; i++)
         {
+            var index = i;
+            var x = App.Model.Filter.FilteredScreenshots[index];
+
             <div class="col-sm-12 col-md-6 col-lg-4 col-xl-3 col-xxl-2 col-xxxl-1 gy-4">
             <div class="card">
               
@@ -24,7 +28,10 @@
               <ul class="list-group list-group-flush">
 
                 <li class="list-group-item">
-                    <img src="@x.RelPathThumb" class="card-img img-fluid rounded" />
+                    <img 
+                        src="@x.RelPathThumb" 
+                        class="card-img img-fluid rounded"
+                             @onclick="args => App.Dispatch(ScreenshotrApp.MessageType.OnClickGalleryImage, index)" />
                 </li>
 
                 <li class="list-group-item">
@@ -50,7 +57,13 @@
                     @if (App.Model.ActiveTagEditScreenshotId != null && x.Id == App.Model.ActiveTagEditScreenshotId)
                     {
                         <div>
-                            <input type="text" class="form-control-xs border-1 border-primary h-75 w-50 d-inline-block" id="myEditTag" @bind-value="LiveTag" @onkeydown="OnKeyDown" @ref="_newTagInput" />
+                            <input type="text" 
+                                class="form-control-xs border-1 border-primary h-75 w-50 d-inline-block" 
+                                id="myEditTag" 
+                                @bind-value="LiveTag" 
+                                @onkeydown="OnKeyDown"
+                                @ref="_newTagInput"
+                                />
                             <button type="button" class="btn btn-outline-primary border-0 p-0" style="cursor: pointer;" @onclick="EditTagSubmit" >
                                 <i class="bi bi-check2"></i>
                             </button>

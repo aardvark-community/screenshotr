@@ -11,7 +11,11 @@
         <NavMenu />
     </div>*@
 
-    <main>
+    <main tabindex="-1"
+        @onkeypress="args => App.Dispatch(ScreenshotrApp.MessageType.OnKeyPress, args)"
+        @onkeydown="args => App.Dispatch(ScreenshotrApp.MessageType.OnKeyDown, args)"
+        @onkeyup="args => App.Dispatch(ScreenshotrApp.MessageType.OnKeyUp, args)"
+        >
         <div class="top-row px-4">
             <div class="container-fluid">
                 <div class="row justify-content-between">

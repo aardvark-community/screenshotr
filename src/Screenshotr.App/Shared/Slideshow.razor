@@ -1,0 +1,117 @@
+﻿@using System.Text.Json
+@inject ScreenshotrApp App
+@inject IJSRuntime JSRuntime
+
+<div class="container-fluid"
+     @ref="imgRef"
+     @onclick=OnClick
+>
+    <div class="row">
+        @if (App.Model.CurrentSlideshowIndex >= 0 && App.Model.CurrentSlideshowIndex < App.Model.Filter.FilteredScreenshots.Count)
+        {
+            var current = App.Model.Filter.FilteredScreenshots[App.Model.CurrentSlideshowIndex];
+            <img class="mx-auto"
+                src="@current.RelPathFullRes" 
+                style="max-width: @(current.Size.X)px; max-height: auto;"
+                alt="@current.Id"
+            >
+        }
+        else
+        {
+            <p>empty filter</p>
+        }
+    </div>
+</div>
+
+
+@code {
+
+    private ElementReference imgRef;
+
+    public class BoundingClientRect
+    {
+        public double X { get; set; }
+        public double Y { get; set; }
+        public double Width { get; set; }
+        public double Height { get; set; }
+        public double Top { get; set; }
+        public double Right { get; set; }
+        public double Bottom { get; set; }
+        public double Left { get; set; }
+    }
+
+    async Task OnClick(MouseEventArgs args)
+    {
+        if (_module == null) throw new Exception("Assertion failed. Module is not initialized.");
+        var bounds = await _module.InvokeAsync<BoundingClientRect>("GetBoundingClientRect", imgRef);
+
+        if (args.ClientX < bounds.Width * 0.5)
+        {
+            App.Dispatch(ScreenshotrApp.MessageType.SetSlideshowIndex, App.Model.CurrentSlideshowIndex - 1);
+        }
+        else
+        {
+            App.Dispatch(ScreenshotrApp.MessageType.SetSlideshowIndex, App.Model.CurrentSlideshowIndex + 1);
+        }
+    }
+
+    private ElementReference _newTagInput { get; set; }
+    private string LiveTag { get; set; } = string.Empty;
+
+    string FormatTimestamp(DateTimeOffset x) => $"{x.Year:0000}-{x.Month:00}-{x.Day:00} {x.Hour:00}:{x.Minute:00}:{x.Second:00} {x.Offset.Hours:+0}:{x.Offset.Minutes:00} UTC";
+    string FormatBytes(long x) => x switch
+    {
+        _ when x < 1000 => $"{x:N0} bytes",
+        _ when x < 1000*1000 => $"{x/1000.0:N0} kB",
+        _ when x < 1000*1000*1000 => $"{x/(1000.0*1000):N1} MB",
+        _ => $"{x/(1000.0*1000*1000):N2} GB",
+    };
+
+    IEnumerable<string> GetTagsAndImportInfo(Screenshot screenshot)
+        => screenshot.Tags
+            .Append(screenshot.ImportInfo.Process)
+            .Append(screenshot.ImportInfo.Hostname)
+            .Append(screenshot.ImportInfo.Username)
+            .OrderBy(x => x)
+            ;
+
+    void RemoveTag(Screenshot screenshot, string tag)
+    {
+        App.Dispatch(ScreenshotrApp.MessageType.RemoveScreenshotTag, (screenshot.Id, tag));
+    }
+
+    void EditTagStart(Screenshot screenshot)
+    {
+        App.Dispatch(ScreenshotrApp.MessageType.EditScreenshotTagStart, screenshot.Id);
+    }
+
+    void EditTagSubmit()
+    {
+        App.Dispatch(ScreenshotrApp.MessageType.EditScreenshotTagSubmit, LiveTag);
+        LiveTag = string.Empty;
+    }
+
+    void EditTagCancel()
+    {
+        App.Dispatch(ScreenshotrApp.MessageType.EditScreenshotTagCancel);
+        LiveTag = string.Empty;
+    }
+    
+    private IJSObjectReference? _module;
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./Shared/Slideshow.razor.js");
+        }
+
+        //if (App.Model.ActiveTagEditScreenshotId != null && _module != null)
+        //{
+        //    await _module.InvokeVoidAsync("SetFocusToElement", "myEditTag");
+        //}
+    }
+
+	private void Update() => InvokeAsync(this.StateHasChanged);
+    protected override void OnInitialized() => App.OnChange += Update;
+    public void Dispose() => App.OnChange -= Update;
+}

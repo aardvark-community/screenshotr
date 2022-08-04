@@ -1,4 +1,7 @@
-﻿using System.Collections.Immutable;
+﻿using Microsoft.AspNetCore.Components.Web;
+using System;
+using System.Collections.Immutable;
+using System.Text.Json;
 
 namespace Screenshotr;
 
@@ -7,8 +10,16 @@ public record ScreenshotrModel(
     string? UserId,
     string? UserName,
     string? UserDisplayName,
-    string? ActiveTagEditScreenshotId, 
+    
+    // gallery
+    bool ShowGallery,
+    string? ActiveTagEditScreenshotId,
     Filter Filter,
+
+    // slideshow
+    bool ShowSlideshow,
+    int CurrentSlideshowIndex,
+
     IScreenshotrApi Service
     )
 {
@@ -28,8 +39,16 @@ public class ScreenshotrApp : ElmApp<ScreenshotrModel, ScreenshotrApp.MessageTyp
             UserId: null,
             UserName: null,
             UserDisplayName: null,
+
+            // gallery
+            ShowGallery: true,
             ActiveTagEditScreenshotId: null,
             Filter: Filter.Empty,
+
+            // slideshow
+            ShowSlideshow: false,
+            CurrentSlideshowIndex: -1,
+
             Service: service
             ),
         update: Update
@@ -59,11 +78,18 @@ public class ScreenshotrApp : ElmApp<ScreenshotrModel, ScreenshotrApp.MessageTyp
         SetUserName,
         SetUserDisplayName,
 
+        OnKeyDown,
+        OnKeyUp,
+        OnKeyPress,
+
         InitScreenshotsFromRepo,
 
         OnRepositoryUpdated,
         OnScreenshotAdded,
         OnScreenshotUpdated,
+
+        OnClickGalleryImage,
+        SetSlideshowIndex,
 
         ToggleSelectedTag,
         ToggleSelectedYear,
@@ -102,6 +128,47 @@ public class ScreenshotrApp : ElmApp<ScreenshotrModel, ScreenshotrApp.MessageTyp
                     break;
                 }
 
+            case MessageType.OnKeyPress:
+                {
+                    var x = message.GetArgument<KeyboardEventArgs>();
+                    //Console.WriteLine(JsonSerializer.Serialize(x));
+                    break;
+                }
+
+            case MessageType.OnKeyDown:
+                {
+                    var x = message.GetArgument<KeyboardEventArgs>();
+                    switch (x.Key)
+                    {
+                        case "ArrowLeft": 
+                            app.Dispatch(MessageType.SetSlideshowIndex, m.CurrentSlideshowIndex - 1); 
+                            break;
+                        case "ArrowRight":
+                            app.Dispatch(MessageType.SetSlideshowIndex, m.CurrentSlideshowIndex + 1);
+                            break;
+                        case "Escape":
+                            if (m.ShowSlideshow)
+                            {
+                                m = m with
+                                {
+                                    ShowGallery = true,
+                                    ShowSlideshow = false,
+                                    CurrentSlideshowIndex = -1
+                                };
+                            }
+                            break;
+                    }
+                    //Console.WriteLine(JsonSerializer.Serialize(x));
+                    break;
+                }
+
+            case MessageType.OnKeyUp:
+                {
+                    var x = message.GetArgument<KeyboardEventArgs>();
+                    //Console.WriteLine(JsonSerializer.Serialize(x));
+                    break;
+                }
+
             case MessageType.InitScreenshotsFromRepo:
                 {
                     var all = ImmutableDictionary<string ,Screenshot>.Empty;
@@ -135,34 +202,66 @@ public class ScreenshotrApp : ElmApp<ScreenshotrModel, ScreenshotrApp.MessageTyp
                 }
 
 
+            case MessageType.OnClickGalleryImage:
+                {
+                    var index = message.GetArgument<int>();
+                    m = m with
+                    {
+                        ShowGallery = false,
+                        ShowSlideshow = true,
+                        CurrentSlideshowIndex = index
+                    };
+                    break;
+                }
+
+            case MessageType.SetSlideshowIndex:
+                {
+                    if (m.ShowSlideshow == false) break;
+
+                    var i = message.GetArgument<int>();
+                    if (i < 0) i = 0;
+                    if (i >= m.Filter.FilteredScreenshots.Count) i = m.Filter.FilteredScreenshots.Count - 1;
+                    if (i == m.CurrentSlideshowIndex) break;
+
+                    m = m with { CurrentSlideshowIndex = i };
+                    
+                    break;
+                }
+
+
             case MessageType.ToggleSelectedTag:
                 {
                     var x = message.GetArgument<string>();
                     m = m with { Filter = m.Filter.ToggleSelectedTag(x) };
+                    if (m.ShowSlideshow) m = m with { CurrentSlideshowIndex = 0 };
                     break;
                 }
             case MessageType.ToggleSelectedYear:
                 {
                     var x = message.GetArgument<int>();
                     m = m with { Filter = m.Filter.ToggleSelectedYear(x) };
+                    if (m.ShowSlideshow) m = m with { CurrentSlideshowIndex = 0 };
                     break;
                 }
             case MessageType.ToggleSelectedUser:
                 {
                     var x = message.GetArgument<string>();
                     m = m with { Filter = m.Filter.ToggleSelectedUser(x) };
+                    if (m.ShowSlideshow) m = m with { CurrentSlideshowIndex = 0 };
                     break;
                 }
             case MessageType.ToggleSelectedHostname:
                 {
                     var x = message.GetArgument<string>();
                     m = m with { Filter = m.Filter.ToggleSelectedHostname(x) };
+                    if (m.ShowSlideshow) m = m with { CurrentSlideshowIndex = 0 };
                     break;
                 }
             case MessageType.ToggleSelectedProcess:
                 {
                     var x = message.GetArgument<string>();
                     m = m with { Filter = m.Filter.ToggleSelectedProcess(x) };
+                    if (m.ShowSlideshow) m = m with { CurrentSlideshowIndex = 0 };
                     break;
                 }
 

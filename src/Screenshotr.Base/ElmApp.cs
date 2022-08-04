@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using Microsoft.AspNetCore.Components.Web;
+using System.Collections;
+using System.Text.Json;
 
 namespace Screenshotr
 {
@@ -28,32 +30,37 @@ namespace Screenshotr
 
             public override string ToString()
             {
-                if (Arg is Unit)
+                switch (Arg)
                 {
-                    return $"[{MessageType}; {Arg}]";
-                }
-                else if (Arg is string s)
-                {
-                    return $"[{MessageType}; \"{Arg}\"]";
-                }
-                else if (Arg is IEnumerable xs)
-                {
-                    var i = 0;
-                    var ys = new List<object>();
-                    var moreThanThree = false;
-                    foreach (var x in xs)
-                    {
-                        if (i < 3) ys.Add(x);
-                        if (i == 3) { moreThanThree = true; break; }
-                        i++;
-                    }
-                    var dots = moreThanThree ? ", ..." : "";
-                    var value = $"[{string.Join(", ", ys.Select(x => x.ToString()))}{dots}]";
-                    return $"[{MessageType}; {value}; {typeof(T).Name}]";
-                }
-                else
-                {
-                    return $"[{MessageType}; {Arg}; {typeof(T).Name}]";
+                    case Unit:
+                    case bool:
+                    case int:
+                    case float:
+                    case double:
+                        return $"[{MessageType}; {Arg}]";
+                    case string x:
+                        return $"[{MessageType}; \"{x}\"]";
+                    case MouseEventArgs x:
+                        return $"[{MessageType}; {JsonSerializer.Serialize(x)}]";
+                    case KeyboardEventArgs x:
+                        return $"[{MessageType}; {JsonSerializer.Serialize(x)}]";
+                    case IEnumerable xs:
+                        {
+                            var i = 0;
+                            var ys = new List<object>();
+                            var moreThanThree = false;
+                            foreach (var x in xs)
+                            {
+                                if (i < 3) ys.Add(x);
+                                if (i == 3) { moreThanThree = true; break; }
+                                i++;
+                            }
+                            var dots = moreThanThree ? ", ..." : "";
+                            var value = $"[{string.Join(", ", ys.Select(x => x.ToString()))}{dots}]";
+                            return $"[{MessageType}; {value}; {typeof(T).Name}]";
+                        }
+                    default:
+                        return $"[{MessageType}; {Arg}; {typeof(T).Name}]";
                 }
             }
         }

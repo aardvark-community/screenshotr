@@ -4,13 +4,15 @@
 @inject ScreenshotrApp App
 
 <PageTitle>Screenshotr</PageTitle>
-@*<p>UserAgent = @_userAgent</p>
-<p>IPAddress = @_ipAddress</p>
-<p>DisplayName = @_displayName</p>
-<p>ForwardedUser = @_forwardedUser</p>*@
 <Filter></Filter>
-<Gallery></Gallery>
-
+@if (App.Model.ShowGallery)
+{
+    <Gallery></Gallery>
+}
+@if (App.Model.ShowSlideshow)
+{
+    <Slideshow></Slideshow>
+}
 
 @code
 {
