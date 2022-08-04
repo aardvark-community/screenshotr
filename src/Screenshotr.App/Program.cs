@@ -1,29 +1,28 @@
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.FileProviders;
 using Screenshotr;
-using System.Net;
-using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
-Console.WriteLine($"[ScreenshotrService] init ...");
-var screenshotrBaseDir = builder.Configuration["Screenshotr:Data"];
-Console.WriteLine($"[ScreenshotrService]     Screenshotr:Data={screenshotrBaseDir}");
-var corsOrigins = builder.Configuration["Screenshotr:CorsOrigins"];
-Console.WriteLine($"[ScreenshotrService]     Screenshotr:CorsOrigins={corsOrigins}");
-bool.TryParse(builder.Configuration["Screenshotr:EnableHttpLogging"], out var enableHttpLogging);
-Console.WriteLine($"[ScreenshotrService]     Screenshotr:EnableHttpLogging={enableHttpLogging}");
+#region init env
 
-var httpHeaderUserId = builder.Configuration["Screenshotr:HttpHeaderUserId"];
-Console.WriteLine($"[ScreenshotrService]     Screenshotr:HttpHeaderUserId={httpHeaderUserId}");
-var httpHeaderUserName = builder.Configuration["Screenshotr:HttpHeaderUserName"];
-Console.WriteLine($"[ScreenshotrService]     Screenshotr:HttpHeaderUserName={httpHeaderUserName}");
-var httpHeaderDisplayName = builder.Configuration["Screenshotr:HttpHeaderDisplayName"];
-Console.WriteLine($"[ScreenshotrService]     Screenshotr:HttpHeaderDisplayName={httpHeaderDisplayName}");
+Console.WriteLine($"[ScreenshotrService] init ...");
+
+var screenshotrBaseDir = builder.Configuration["Screenshotr:Data"];
+var corsOrigins = builder.Configuration["Screenshotr:CorsOrigins"];
+var enableHttpLogging = bool.TryParse(builder.Configuration["Screenshotr:EnableHttpLogging"], out var x) && x;
+ScreenshotrApp.HttpHeaderUserId = builder.Configuration["Screenshotr:HttpHeaderUserId"];
+ScreenshotrApp.HttpHeaderUserName = builder.Configuration["Screenshotr:HttpHeaderUserName"];
+ScreenshotrApp.HttpHeaderUserDisplayName = builder.Configuration["Screenshotr:HttpHeaderDisplayName"];
+
+Console.WriteLine($"[ScreenshotrService]     Screenshotr:Data={screenshotrBaseDir}");
+Console.WriteLine($"[ScreenshotrService]     Screenshotr:CorsOrigins={corsOrigins}");
+Console.WriteLine($"[ScreenshotrService]     Screenshotr:EnableHttpLogging={enableHttpLogging}");
+Console.WriteLine($"[ScreenshotrService]     Screenshotr:HttpHeaderUserId={ScreenshotrApp.HttpHeaderUserId}");
+Console.WriteLine($"[ScreenshotrService]     Screenshotr:HttpHeaderUserName={ScreenshotrApp.HttpHeaderUserName}");
+Console.WriteLine($"[ScreenshotrService]     Screenshotr:HttpHeaderDisplayName={ScreenshotrApp.HttpHeaderUserDisplayName}");
 
 screenshotrBaseDir = Path.GetFullPath(screenshotrBaseDir);
 var repo = Repository.Init(screenshotrBaseDir);
@@ -33,6 +32,8 @@ Console.WriteLine($"[ScreenshotrService]     version {status.Version}");
 Console.WriteLine($"[ScreenshotrService]     base directory is {screenshotrBaseDir}");
 Console.WriteLine($"[ScreenshotrService]     found {status.Count} screenshots");
 Console.WriteLine($"[ScreenshotrService]     done");
+
+#endregion
 
 // Add services to the container.
 builder.Services.AddRazorPages();
@@ -66,9 +67,9 @@ if (enableHttpLogging)
     builder.Services.AddHttpLogging(options =>
     {
         options.LoggingFields = Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.All;
-        if (!string.IsNullOrWhiteSpace(httpHeaderUserId)) options.RequestHeaders.Add(httpHeaderUserId);
-        if (!string.IsNullOrWhiteSpace(httpHeaderUserName)) options.RequestHeaders.Add(httpHeaderUserName);
-        if (!string.IsNullOrWhiteSpace(httpHeaderDisplayName)) options.RequestHeaders.Add(httpHeaderDisplayName);
+        if (!string.IsNullOrWhiteSpace(ScreenshotrApp.HttpHeaderUserId)) options.RequestHeaders.Add(ScreenshotrApp.HttpHeaderUserId);
+        if (!string.IsNullOrWhiteSpace(ScreenshotrApp.HttpHeaderUserName)) options.RequestHeaders.Add(ScreenshotrApp.HttpHeaderUserName);
+        if (!string.IsNullOrWhiteSpace(ScreenshotrApp.HttpHeaderUserDisplayName)) options.RequestHeaders.Add(ScreenshotrApp.HttpHeaderUserDisplayName);
         //options.RequestHeaders.Add("X-Display-Name");
         //options.RequestHeaders.Add("X-Forwarded-User");
         //options.RequestHeaders.Add("Cookie");
@@ -115,14 +116,6 @@ RegisterApi<ApiGetScreenshotRequest, ApiGetScreenshotResponse>(Global.ApiPathScr
 RegisterApi<ApiCreateApiKeyRequest, ApiCreateApiKeyResponse>(Global.ApiPathApiKeysGenerate, screenshotrService.CreateApiKey, Roles.Admin);
 RegisterApi<ApiDeleteApiKeyRequest, ApiDeleteApiKeyResponse>(Global.ApiPathApiKeysDelete, screenshotrService.DeleteApiKey, Roles.Admin);
 RegisterApi<ApiListApiKeysRequest, ApiListApiKeysResponse>(Global.ApiPathApiKeysList, screenshotrService.ListApiKeys, Roles.Admin);
-
-//app.MapGet("/test", (HttpContext context) =>
-//{
-//    foreach (var h in context.Request.Headers)
-//    {
-//        Console.WriteLine($"[DEBUG DEBUG DEBUG] {JsonSerializer.Serialize(h)}");
-//    }
-//});
 
 app.MapBlazorHub();
 app.MapHub<ScreenshotrHub>("/screenshotrhub");

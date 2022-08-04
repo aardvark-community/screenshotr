@@ -4,6 +4,9 @@ namespace Screenshotr;
 
 public record ScreenshotrModel(
     string Version,
+    string? UserId,
+    string? UserName,
+    string? UserDisplayName,
     string? ActiveTagEditScreenshotId, 
     Filter Filter,
     IScreenshotrApi Service
@@ -15,9 +18,16 @@ public record ScreenshotrModel(
 
 public class ScreenshotrApp : ElmApp<ScreenshotrModel, ScreenshotrApp.MessageType>, IDisposable
 {
+    public static string? HttpHeaderUserId { get; set; } = null;
+    public static string? HttpHeaderUserName { get; set; } = null;
+    public static string? HttpHeaderUserDisplayName { get; set; } = null;
+
     public ScreenshotrApp(IScreenshotrApi service) : base(
         initialModel: new(
             Global.Version,
+            UserId: null,
+            UserName: null,
+            UserDisplayName: null,
             ActiveTagEditScreenshotId: null,
             Filter: Filter.Empty,
             Service: service
@@ -45,6 +55,10 @@ public class ScreenshotrApp : ElmApp<ScreenshotrModel, ScreenshotrApp.MessageTyp
 
     public enum MessageType
     {
+        SetUserId,
+        SetUserName,
+        SetUserDisplayName,
+
         InitScreenshotsFromRepo,
 
         OnRepositoryUpdated,
@@ -67,6 +81,27 @@ public class ScreenshotrApp : ElmApp<ScreenshotrModel, ScreenshotrApp.MessageTyp
     {
         switch (message.MessageType)
         {
+            case MessageType.SetUserId:
+                {
+                    var x = message.GetArgument<string?>();
+                    if (!string.IsNullOrWhiteSpace(x)) m = m with { UserId = x };
+                    break;
+                }
+
+            case MessageType.SetUserName:
+                {
+                    var x = message.GetArgument<string?>();
+                    if (!string.IsNullOrWhiteSpace(x)) m = m with { UserName = x };
+                    break;
+                }
+
+            case MessageType.SetUserDisplayName:
+                {
+                    var x = message.GetArgument<string?>();
+                    if (!string.IsNullOrWhiteSpace(x)) m = m with { UserDisplayName = x };
+                    break;
+                }
+
             case MessageType.InitScreenshotsFromRepo:
                 {
                     var all = ImmutableDictionary<string ,Screenshot>.Empty;

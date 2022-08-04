@@ -1,6 +1,6 @@
 ﻿@inherits LayoutComponentBase
-@inject ScreenshotrApp App
 @using Microsoft.AspNetCore.Http
+@inject ScreenshotrApp App
 @inject IHttpContextAccessor httpContextAccessor
 
 <PageTitle>Screenshotr.App</PageTitle>
@@ -19,7 +19,7 @@
                         <Stats />
                     </div>
                     <span class="col text-end" style="font-size:0.75em">
-                        @_displayName
+                        @App.Model.UserName
                     </span>
                     <div class="col-6 text-end" style="font-size:0.75em">
                         API @App.Model.Version, App @Global.AppVersion
@@ -37,8 +37,6 @@
 
 @code
 {
-    private string _displayName = "";
-
     private void Update() => InvokeAsync(this.StateHasChanged);
     protected override void OnInitialized()
     {
@@ -46,7 +44,21 @@
 
         if (httpContextAccessor.HttpContext != null)
         {
-            _displayName = httpContextAccessor.HttpContext.Request.Headers["X-Display-Name"];
+            if (!string.IsNullOrWhiteSpace(ScreenshotrApp.HttpHeaderUserId))
+            {
+                var x = httpContextAccessor.HttpContext.Request.Headers[ScreenshotrApp.HttpHeaderUserId];
+                App.Dispatch(ScreenshotrApp.MessageType.SetUserId, x);
+            }
+            if (!string.IsNullOrWhiteSpace(ScreenshotrApp.HttpHeaderUserName))
+            {
+                var x = httpContextAccessor.HttpContext.Request.Headers[ScreenshotrApp.HttpHeaderUserName];
+                App.Dispatch(ScreenshotrApp.MessageType.SetUserName, x);
+            }
+            if (!string.IsNullOrWhiteSpace(ScreenshotrApp.HttpHeaderUserDisplayName))
+            {
+                var x = httpContextAccessor.HttpContext.Request.Headers[ScreenshotrApp.HttpHeaderUserDisplayName];
+                App.Dispatch(ScreenshotrApp.MessageType.SetUserDisplayName, x);
+            }
         }
     }
     public void Dispose() => App.OnChange -= Update;
