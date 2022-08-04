@@ -9,11 +9,11 @@
     @if (App.Model.CurrentSlideshowIndex >= 0 && App.Model.CurrentSlideshowIndex < App.Model.Filter.FilteredScreenshots.Count)
     {
         var x = App.Model.Filter.FilteredScreenshots[App.Model.CurrentSlideshowIndex];
-        <div style="widht: 100%; height: 100%;">
-            <div style="widht: 100%; height: 80%; background-color:black">
+        <div style="widht: 100%; height: 100%; background-color:black">
+            <div style="widht: 100%; height: 80%;">
                 <img
                     src="@x.RelPathFullRes"
-                    style="width: 100%; height: 100%; object-fit: scale-down;"
+                    style="width: 100%; height: 100%; object-fit: scale-down; padding-top: 0.2em;"
                     alt="@x.Id"
                 >
             </div>
@@ -66,7 +66,7 @@
                 </div>
 
                 <div class="p-2 m-2 d-flex justify-content-center">
-                    <div class="badge bg-light text-dark" style="margin-right: 0.2em;">
+                    <div class="badge bg-light text-dark" style="margin-right: 1em;">
                         @FormatTimestamp(x.Created)
                     </div>
                     <div class="badge bg-light text-dark">
