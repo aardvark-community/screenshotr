@@ -44,20 +44,28 @@
 
         if (httpContextAccessor.HttpContext != null)
         {
+            foreach (var h in httpContextAccessor.HttpContext.Request.Headers)
+            {
+                Console.WriteLine($"{h.Value}");
+            }
+
             if (!string.IsNullOrWhiteSpace(ScreenshotrApp.HttpHeaderUserId))
             {
-                var x = (string)httpContextAccessor.HttpContext.Request.Headers[ScreenshotrApp.HttpHeaderUserId];
-                App.Dispatch(ScreenshotrApp.MessageType.SetUserId, x);
+                var x = httpContextAccessor.HttpContext.Request.Headers[ScreenshotrApp.HttpHeaderUserId];
+                Console.WriteLine($"SetUserId: {x.ToString()}");
+                App.Dispatch(ScreenshotrApp.MessageType.SetUserId, x.ToString());
             }
             if (!string.IsNullOrWhiteSpace(ScreenshotrApp.HttpHeaderUserName))
             {
-                var x = (string)httpContextAccessor.HttpContext.Request.Headers[ScreenshotrApp.HttpHeaderUserName];
-                App.Dispatch(ScreenshotrApp.MessageType.SetUserName, x);
+                var x = httpContextAccessor.HttpContext.Request.Headers[ScreenshotrApp.HttpHeaderUserName];
+                Console.WriteLine($"SetUserName: {x.ToString()}");
+                App.Dispatch(ScreenshotrApp.MessageType.SetUserName, x.ToString());
             }
             if (!string.IsNullOrWhiteSpace(ScreenshotrApp.HttpHeaderUserDisplayName))
             {
-                var x = (string)httpContextAccessor.HttpContext.Request.Headers[ScreenshotrApp.HttpHeaderUserDisplayName];
-                App.Dispatch(ScreenshotrApp.MessageType.SetUserDisplayName, x);
+                var x = httpContextAccessor.HttpContext.Request.Headers[ScreenshotrApp.HttpHeaderUserDisplayName];
+                Console.WriteLine($"SetUserDisplayName: {x.ToString()}");
+                App.Dispatch(ScreenshotrApp.MessageType.SetUserDisplayName, x.ToString());
             }
         }
     }
