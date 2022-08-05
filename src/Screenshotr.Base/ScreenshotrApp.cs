@@ -15,7 +15,6 @@ public record ScreenshotrModel(
     bool ShowGallery,
     string? ActiveTagEditScreenshotId,
     Filter Filter,
-    string LiveSearch,
 
     // slideshow
     bool ShowSlideshow,
@@ -45,7 +44,6 @@ public class ScreenshotrApp : ElmApp<ScreenshotrModel, ScreenshotrApp.MessageTyp
             ShowGallery: true,
             ActiveTagEditScreenshotId: null,
             Filter: Filter.Empty,
-            LiveSearch: string.Empty,
 
             // slideshow
             ShowSlideshow: false,
@@ -214,7 +212,7 @@ public class ScreenshotrApp : ElmApp<ScreenshotrModel, ScreenshotrApp.MessageTyp
             case MessageType.SetLiveSearch:
                 {
                     var s = message.GetArgument<string>();
-                    m = m with { LiveSearch = s };
+                    m = m with { Filter = m.Filter with { LiveSearch = s } };
                     break;
                 }
 

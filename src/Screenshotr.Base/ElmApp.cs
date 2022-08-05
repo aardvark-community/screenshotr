@@ -88,12 +88,17 @@ namespace Screenshotr
         private long _msgId = 0;
         private void Run() => Task.Run(async () =>
         {
+            var instanceId = Guid.NewGuid().ToString()[..8].ToUpperInvariant();
+            var colorBg = (ConsoleColor)Random.Shared.Next(16);
+            var colorFg = colorBg;
+            while (colorBg == colorFg) colorFg = (ConsoleColor)Random.Shared.Next(16);
+
             while (true)
             {
                 await _messageIsAvailable.WaitAsync();
 
-                DateTimeOffset t0; long id; IMessage msg;
-                lock (_messages) (t0, id, msg) = _messages.Dequeue();
+                DateTimeOffset t0; long msgId; IMessage msg;
+                lock (_messages) (t0, msgId, msg) = _messages.Dequeue();
 
                 var t1 = DateTimeOffset.Now;
                 try
@@ -107,12 +112,18 @@ namespace Screenshotr
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine($"[ERR][{id}][{t0.ToUnixTimeMilliseconds()}] {e}");
+                    Console.BackgroundColor = colorBg;
+                    Console.ForegroundColor = colorFg;
+                    Console.WriteLine($"[{t0.Year:0000}-{t0.Month:00}-{t0.Day:00} {t0.Hour:00}:{t0.Minute:00}:{t0.Second:00}.{t0.Millisecond:000}][{instanceId}/{msgId,6}][ERR] {e}");
+                    Console.ResetColor();
                 }
                 finally
                 {
                     var t2 = DateTimeOffset.Now;
-                    Console.WriteLine($"[MSG][{id}][{t0.ToUnixTimeMilliseconds()}] {t1.ToUnixTimeMilliseconds() - t0.ToUnixTimeMilliseconds(),4} | {t2.ToUnixTimeMilliseconds() - t1.ToUnixTimeMilliseconds(),4} | {msg}");
+                    Console.BackgroundColor = colorBg;
+                    Console.ForegroundColor = colorFg;
+                    Console.WriteLine($"[{t0.Year:0000}-{t0.Month:00}-{t0.Day:00} {t0.Hour:00}:{t0.Minute:00}:{t0.Second:00}.{t0.Millisecond:000}][{instanceId}/{msgId,6}][MSG] {(int)(t1 - t0).TotalMilliseconds,4} ms | {(int)(t2 - t1).TotalMilliseconds,4} ms | {msg}");
+                    Console.ResetColor();
                 }
             }
         });

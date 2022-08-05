@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Screenshotr;
@@ -225,6 +226,7 @@ public record IndexedScreenshots(
 
 public record Filter(
     IndexedScreenshots AllScreenshots,
+    string LiveSearch,
     ImmutableHashSet<string> SelectedTags,
     ImmutableHashSet<int>    SelectedYears,
     ImmutableHashSet<string> SelectedUsers,
@@ -236,6 +238,7 @@ public record Filter(
 {
     public static Filter Empty = new Filter(
         AllScreenshots   : IndexedScreenshots.Empty,
+        LiveSearch       : string.Empty,
         SelectedTags     : ImmutableHashSet<string>.Empty,
         SelectedYears    : ImmutableHashSet<int   >.Empty,
         SelectedUsers    : ImmutableHashSet<string>.Empty,
@@ -261,6 +264,7 @@ public record Filter(
     {
         var self = new Filter(
             AllScreenshots   : IndexedScreenshots.Create(allScreenshots),
+            LiveSearch       : string.Empty,
             SelectedTags     : ImmutableHashSet<string>.Empty,
             SelectedYears    : ImmutableHashSet<int   >.Empty,
             SelectedUsers    : ImmutableHashSet<string>.Empty,
@@ -289,13 +293,26 @@ public record Filter(
         (this with { SelectedYears = SelectedYears.Contains(x) ? SelectedYears.Remove(x) : SelectedYears.Add(x) })
         .ComputeCache();
     public Filter ToggleSelectedUser(string x) =>
-        (this with { SelectedUsers = SelectedUsers.Contains(x) ? SelectedUsers.Remove(x) : SelectedUsers.Add(x) })
+        (this with { 
+            SelectedUsers     = SelectedUsers.Contains(x) ? SelectedUsers.Remove(x) : SelectedUsers.Add(x),
+            SelectedHostnames = SelectedHostnames.Clear(),
+            SelectedProcesses = SelectedProcesses.Clear()
+        })
         .ComputeCache();
     public Filter ToggleSelectedHostname(string x) =>
-        (this with { SelectedHostnames = SelectedHostnames.Contains(x) ? SelectedHostnames.Remove(x) : SelectedHostnames.Add(x) })
+        (this with {
+            SelectedUsers     = SelectedUsers.Clear(),
+            SelectedHostnames = SelectedHostnames.Contains(x) ? SelectedHostnames.Remove(x) : SelectedHostnames.Add(x),
+            SelectedProcesses = SelectedProcesses.Clear()
+        })
         .ComputeCache();
     public Filter ToggleSelectedProcess(string x) =>
-        (this with { SelectedProcesses = SelectedProcesses.Contains(x) ? SelectedProcesses.Remove(x) : SelectedProcesses.Add(x) })
+        (this with
+        {
+            SelectedUsers     = SelectedUsers.Clear(),
+            SelectedHostnames = SelectedHostnames.Clear(),
+            SelectedProcesses = SelectedProcesses.Contains(x) ? SelectedProcesses.Remove(x) : SelectedProcesses.Add(x) 
+        })
         .ComputeCache();
 
 
@@ -305,6 +322,10 @@ public record Filter(
 
     private Filter ComputeCache()
     {
+        var debugGuid = Guid.NewGuid();
+        var sw = new Stopwatch(); sw.Restart();
+        Console.WriteLine($"[DEBUG {debugGuid}] Filter.ComputeCache");
+
         {
             var xs = AllScreenshots.All.Values.AsParallel();
 
@@ -355,6 +376,8 @@ public record Filter(
             //xs = xs.Skip(Skip).Take(Take);
 
             _cacheFilteredScreenshots = xs.ToImmutableList();
+
+            Console.WriteLine($"[DEBUG {debugGuid}] {sw.Elapsed} | A"); sw.Restart();
         }
 
         // tags
@@ -383,6 +406,8 @@ public record Filter(
                 .OrderBy(x => x.tag);
 
             _cacheFilteredTags = xs.ToImmutableList();
+
+            Console.WriteLine($"[DEBUG {debugGuid}] {sw.Elapsed} | B"); sw.Restart();
         }
 
         // years
@@ -399,6 +424,8 @@ public record Filter(
                 .OrderBy(x => x.year);
 
             _cacheFilteredYears = xs.ToImmutableList();
+
+            Console.WriteLine($"[DEBUG {debugGuid}] {sw.Elapsed} | C"); sw.Restart();
         }
 
         // users
@@ -415,6 +442,8 @@ public record Filter(
                 .OrderBy(x => x.user);
 
             _cacheFilteredUsers = xs.ToImmutableList();
+
+            Console.WriteLine($"[DEBUG {debugGuid}] {sw.Elapsed} | D"); sw.Restart();
         }
 
         // hostnames
@@ -431,6 +460,8 @@ public record Filter(
                 .OrderBy(x => x.hostname);
 
             _cacheFilteredHostnames = xs.ToImmutableList();
+
+            Console.WriteLine($"[DEBUG {debugGuid}] {sw.Elapsed} | E"); sw.Restart();
         }
 
         // processes
@@ -447,15 +478,17 @@ public record Filter(
                 .OrderBy(x => x.process);
 
             _cacheFilteredProcesses = xs.ToImmutableList();
+
+            Console.WriteLine($"[DEBUG {debugGuid}] {sw.Elapsed} | F"); sw.Restart();
         }
 
         return this;
     }
 
-    private ImmutableList<Screenshot>    _cacheFilteredScreenshots = null!;
-    private ImmutableList<(string, int)> _cacheFilteredTags        = null!;
-    private ImmutableList<(int   , int)> _cacheFilteredYears       = null!;
-    private ImmutableList<(string, int)> _cacheFilteredUsers       = null!;
-    private ImmutableList<(string, int)> _cacheFilteredHostnames   = null!;
-    private ImmutableList<(string, int)> _cacheFilteredProcesses   = null!;
+    private IReadOnlyList<Screenshot>    _cacheFilteredScreenshots = null!;
+    private IReadOnlyList<(string, int)> _cacheFilteredTags        = null!;
+    private IReadOnlyList<(int   , int)> _cacheFilteredYears       = null!;
+    private IReadOnlyList<(string, int)> _cacheFilteredUsers       = null!;
+    private IReadOnlyList<(string, int)> _cacheFilteredHostnames   = null!;
+    private IReadOnlyList<(string, int)> _cacheFilteredProcesses   = null!;
 }

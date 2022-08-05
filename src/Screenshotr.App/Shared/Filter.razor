@@ -5,25 +5,32 @@
     <ul class="list-group">
 
         <li class="list-group-item" style="font-size:0.75em">
-            <div class="d-flex flex-row justify-content-between">
-                <span style="margin-right: 0.3em;">search</span>
+            @*<div class="d-flex flex-row justify-content-between">*@
+            <div class="d-flex flex-row justify-content-end">
+                @* live search *@
+                @if (false)
+                {
                 <div class="flex-fill" 
                     @onkeydown:stopPropagation="true"
                     @onkeypress:stopPropagation="true"
                     @onkeyup:stopPropagation="true"
                     >
+                    <span style="margin-right: 0.3em;">search</span>
                     <input type="text"
-                           class="form-control-xs border-1 border-primary h-75 w-50 d-inline-block"
-                           id="myEditTag"
-                           @bind-value="LiveSearchString"
-                           @onkeypress="OnKeyPress"
-                           @ref="_searchInputRef" />
+                            class="form-control-xs border-1 border-primary h-75 w-50 d-inline-block"
+                            id="myEditTag"
+                            @bind-value="LiveSearchString"
+                            @onkeypress="OnKeyPress"
+                            @ref="_searchInputRef" />
                     <button 
                         type="button" class="btn btn-outline-primary border-0 p-0" style="cursor: pointer;" 
                         @onclick="() => App.Dispatch(ScreenshotrApp.MessageType.SetLiveSearch, string.Empty)">
                         <i class="bi bi-x"></i>
                     </button>
                 </div>
+                }
+
+                @* clear filter *@
                 <div>
                     <span 
                         class="badge bg-link text-dark" 
@@ -33,6 +40,7 @@
                         <i class="bi bi bi-x-lg" style="margin-right: 0.3em;"></i>clear filter
                     </span>
                 </div>
+
             </div>
         </li>
 

@@ -85,6 +85,8 @@ public record Screenshot(
     public Screenshot AddCustom(IEnumerable<Custom.Entry> entries) => this with { Custom = Custom.AddRange(entries) };
     public Screenshot AddCustom(IEnumerable<(string Key, object Value)> entries) => this with { Custom = Custom.AddRange(entries) };
 
+    public override string ToString() => ToJson();
+
     public string ToJson() => JsonSerializer.Serialize(this, Utils.JsonOptions);
 
     public static Screenshot ParseJson(string json) => JsonSerializer
