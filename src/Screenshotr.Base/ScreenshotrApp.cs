@@ -90,6 +90,7 @@ public class ScreenshotrApp : ElmApp<ScreenshotrModel, ScreenshotrApp.MessageTyp
 
         OnClickGalleryImage,
         SetSlideshowIndex,
+        LeaveSlideShow,
 
         ToggleSelectedTag,
         ToggleSelectedYear,
@@ -147,15 +148,7 @@ public class ScreenshotrApp : ElmApp<ScreenshotrModel, ScreenshotrApp.MessageTyp
                             app.Dispatch(MessageType.SetSlideshowIndex, m.CurrentSlideshowIndex + 1);
                             break;
                         case "Escape":
-                            if (m.ShowSlideshow)
-                            {
-                                m = m with
-                                {
-                                    ShowGallery = true,
-                                    ShowSlideshow = false,
-                                    CurrentSlideshowIndex = -1
-                                };
-                            }
+                            app.Dispatch(MessageType.LeaveSlideShow);
                             break;
                     }
                     //Console.WriteLine(JsonSerializer.Serialize(x));
@@ -226,6 +219,20 @@ public class ScreenshotrApp : ElmApp<ScreenshotrModel, ScreenshotrApp.MessageTyp
 
                     m = m with { CurrentSlideshowIndex = i };
                     
+                    break;
+                }
+
+            case MessageType.LeaveSlideShow:
+                {
+                    if (m.ShowSlideshow)
+                    {
+                        m = m with
+                        {
+                            ShowGallery = true,
+                            ShowSlideshow = false,
+                            CurrentSlideshowIndex = -1
+                        };
+                    }
                     break;
                 }
 

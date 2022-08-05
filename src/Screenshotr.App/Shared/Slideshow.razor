@@ -10,9 +10,9 @@
     @if (App.Model.CurrentSlideshowIndex >= 0 && App.Model.CurrentSlideshowIndex < App.Model.Filter.FilteredScreenshots.Count)
     {
         var x = App.Model.Filter.FilteredScreenshots[App.Model.CurrentSlideshowIndex];
-        <div style="widht: 100%; height: 100%; background-color:black">
-           
-            <div style="widht: 100%; height: 80%;">
+        <div style="width: 100%; height: 100%; background-color:black; padding-bottom:32px;">
+
+            <div style="width: 100%; height: 80%;">
                 <img
                     src="@x.RelPathFullRes"
                     style="width: 100%; height: 100%; object-fit: scale-down; padding-top: 0.2em;"
@@ -20,7 +20,7 @@
                 >
             </div>
 
-            <div class="d-flex flex-column" style="widht: 100%; height: 20%;">
+            <div class="d-flex flex-column" style="width: 100%; height: 20%;">
 
                 <div class="p-2 m-2 d-flex justify-content-center">
                     @foreach (var tag in GetTagsAndImportInfo(x))
@@ -82,6 +82,15 @@
                 </div>
 
             </div>
+
+            <div 
+                class="text-light" 
+                style="position:absolute; top:0; right:0; padding: 2em; cursor:pointer" 
+                @onclick="() => App.Dispatch(ScreenshotrApp.MessageType.LeaveSlideShow)">
+                <span>Close</span>
+                <i class="bi bi-x-lg"></i>
+            </div>
+
         </div>
     }
     else
@@ -110,7 +119,9 @@
     async Task OnClick(MouseEventArgs args)
     {
         if (_module == null) throw new Exception("Assertion failed. Module is not initialized.");
+
         var bounds = await _module.InvokeAsync<BoundingClientRect>("GetBoundingClientRect", imgRef);
+        if (bounds == null) return;
 
         if (args.ClientX < bounds.Width * 0.5)
         {
@@ -174,7 +185,7 @@
         App.Dispatch(ScreenshotrApp.MessageType.EditScreenshotTagCancel);
         LiveTag = string.Empty;
     }
-    
+
     private IJSObjectReference? _module;
     protected async override Task OnAfterRenderAsync(bool firstRender)
     {
@@ -183,7 +194,10 @@
             _module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./Shared/Slideshow.razor.js");
         }
 
-        await _module.InvokeVoidAsync("SetFocusToElement", "mySlideshowContainer");
+        if (_module != null)
+        {
+            await _module.InvokeVoidAsync("SetFocusToElement", "mySlideshowContainer");
+        }
     }
 
 	private void Update() => InvokeAsync(this.StateHasChanged);

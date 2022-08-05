@@ -13,6 +13,7 @@ export function GetInputText(element) {
 }
 
 export function GetBoundingClientRect(element) {
+    if (element === null) return null;
     return element.getBoundingClientRect();
 }
 
