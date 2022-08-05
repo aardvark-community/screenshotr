@@ -89,9 +89,9 @@ namespace Screenshotr
         private void Run() => Task.Run(async () =>
         {
             var instanceId = Guid.NewGuid().ToString()[..8].ToUpperInvariant();
-            var colorBg = (ConsoleColor)Random.Shared.Next(16);
-            var colorFg = colorBg;
-            while (colorBg == colorFg) colorFg = (ConsoleColor)Random.Shared.Next(16);
+            var colorBg = (ConsoleColor)Random.Shared.Next(8);
+            var colorFg = (ConsoleColor)(~(int)colorBg & 0b1111);
+            //while (colorBg == colorFg) colorFg = (ConsoleColor)Random.Shared.Next(16);
 
             while (true)
             {

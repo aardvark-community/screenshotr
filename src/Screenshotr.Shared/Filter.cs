@@ -1,4 +1,6 @@
-﻿using System;
+﻿#undef PRINT_TIMING
+
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -322,10 +324,11 @@ public record Filter(
 
     private Filter ComputeCache()
     {
+#if PRINT_TIMING
         var debugGuid = Guid.NewGuid();
         var sw = new Stopwatch(); sw.Restart();
         Console.WriteLine($"[DEBUG {debugGuid}] Filter.ComputeCache");
-
+#endif
         {
             var xs = AllScreenshots.All.Values.AsParallel();
 
@@ -377,7 +380,9 @@ public record Filter(
 
             _cacheFilteredScreenshots = xs.ToImmutableList();
 
+#if PRINT_TIMING
             Console.WriteLine($"[DEBUG {debugGuid}] {sw.Elapsed} | A"); sw.Restart();
+#endif
         }
 
         // tags
@@ -407,7 +412,9 @@ public record Filter(
 
             _cacheFilteredTags = xs.ToImmutableList();
 
+#if PRINT_TIMING
             Console.WriteLine($"[DEBUG {debugGuid}] {sw.Elapsed} | B"); sw.Restart();
+#endif
         }
 
         // years
@@ -425,7 +432,9 @@ public record Filter(
 
             _cacheFilteredYears = xs.ToImmutableList();
 
+#if PRINT_TIMING
             Console.WriteLine($"[DEBUG {debugGuid}] {sw.Elapsed} | C"); sw.Restart();
+#endif
         }
 
         // users
@@ -443,7 +452,9 @@ public record Filter(
 
             _cacheFilteredUsers = xs.ToImmutableList();
 
+#if PRINT_TIMING
             Console.WriteLine($"[DEBUG {debugGuid}] {sw.Elapsed} | D"); sw.Restart();
+#endif
         }
 
         // hostnames
@@ -461,7 +472,9 @@ public record Filter(
 
             _cacheFilteredHostnames = xs.ToImmutableList();
 
+#if PRINT_TIMING
             Console.WriteLine($"[DEBUG {debugGuid}] {sw.Elapsed} | E"); sw.Restart();
+#endif
         }
 
         // processes
@@ -479,7 +492,9 @@ public record Filter(
 
             _cacheFilteredProcesses = xs.ToImmutableList();
 
+#if PRINT_TIMING
             Console.WriteLine($"[DEBUG {debugGuid}] {sw.Elapsed} | F"); sw.Restart();
+#endif
         }
 
         return this;
