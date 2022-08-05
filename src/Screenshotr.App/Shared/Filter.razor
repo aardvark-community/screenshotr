@@ -3,28 +3,35 @@
 <div>
   <ul class="list-group">
 
+    <li class="list-group-item justify-content-end d-flex">
+            <span class="badge bg-link text-dark" style="margin-right: 0.2em; cursor: pointer;"
+            @onclick="() => App.Dispatch(ScreenshotrApp.MessageType.ResetFilter)">
+                <span><i class="bi bi bi-x-lg" style="margin-right: 0.3em;"></i>clear filter</span>
+        </span>
+    </li>
+
     <li class="list-group-item">
-    <div>
-    @foreach (var (year, count) in App.Model.Filter.FilteredYears)
-    {
-        @if (App.Model.Filter.SelectedYears.Contains(year))
-        {
-            <span class="badge bg-primary" style="margin-right: 0.2em; cursor: pointer;"
-                @onclick="() => App.Dispatch(ScreenshotrApp.MessageType.ToggleSelectedYear, year)"
-                >
-                <span><i class="bi bi-clock" style="margin-right: 0.3em;"></i>@year (@count)</span>
-            </span>
-        }
-        else
-        {
-            <span class="badge bg-light text-dark" style="margin-right: 0.2em; cursor: pointer;"
-                @onclick="() => App.Dispatch(ScreenshotrApp.MessageType.ToggleSelectedYear, year)"
-                >
-                <span><i class="bi bi-clock" style="margin-right: 0.3em;"></i>@year (@count)</span>
-            </span>
-        }
-    }
-    </div>
+        <div>
+            @foreach (var (year, count) in App.Model.Filter.FilteredYears)
+            {
+                @if (App.Model.Filter.SelectedYears.Contains(year))
+                {
+                    <span class="badge bg-primary" style="margin-right: 0.2em; cursor: pointer;"
+                        @onclick="() => App.Dispatch(ScreenshotrApp.MessageType.ToggleSelectedYear, year)"
+                        >
+                        <span><i class="bi bi-clock" style="margin-right: 0.3em;"></i>@year (@count)</span>
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-light text-dark" style="margin-right: 0.2em; cursor: pointer;"
+                        @onclick="() => App.Dispatch(ScreenshotrApp.MessageType.ToggleSelectedYear, year)"
+                        >
+                        <span><i class="bi bi-clock" style="margin-right: 0.3em;"></i>@year (@count)</span>
+                    </span>
+                }
+            }
+        </div>
     </li>
 
     <li class="list-group-item">

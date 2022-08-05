@@ -259,20 +259,6 @@ public record Filter(
 
     public static Filter Create(ImmutableDictionary<string, Screenshot> allScreenshots, FilterSortingMode sortingMode, int take)
     {
-        //var allTags = allScreenshots.Values
-        //    .AsParallel()
-        //    .SelectMany(x => x.Tags.Select(tag => (Tag: tag, Screenshot: x)))
-        //    .GroupBy(x => x.Tag)
-        //    .ToImmutableDictionary(g => g.Key, g => g.ToImmutableDictionary(x => x.Screenshot.Id, x => x.Screenshot))
-        //    ;
-
-        //var allYears = allScreenshots.Values
-        //    .AsParallel()
-        //    .Select(x => (x.Created.Year, Screenshot: x))
-        //    .GroupBy(x => x.Year)
-        //    .ToImmutableDictionary(g => g.Key, g => g.ToImmutableDictionary(x => x.Screenshot.Id, x => x.Screenshot))
-        //    ;
-
         var self = new Filter(
             AllScreenshots   : IndexedScreenshots.Create(allScreenshots),
             SelectedTags     : ImmutableHashSet<string>.Empty,
@@ -286,6 +272,15 @@ public record Filter(
         return self.ComputeCache();
     }
 
+    public Filter ResetFilter() =>
+        (this with { 
+            SelectedTags      = ImmutableHashSet<string>.Empty,
+            SelectedYears     = ImmutableHashSet<int   >.Empty,
+            SelectedUsers     = ImmutableHashSet<string>.Empty,
+            SelectedHostnames = ImmutableHashSet<string>.Empty,
+            SelectedProcesses = ImmutableHashSet<string>.Empty,
+        })
+        .ComputeCache();
 
     public Filter ToggleSelectedTag(string x) =>
         (this with { SelectedTags = SelectedTags.Contains(x) ? SelectedTags.Remove(x) : SelectedTags.Add(x) })

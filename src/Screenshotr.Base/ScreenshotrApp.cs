@@ -92,6 +92,7 @@ public class ScreenshotrApp : ElmApp<ScreenshotrModel, ScreenshotrApp.MessageTyp
         SetSlideshowIndex,
         LeaveSlideShow,
 
+        ResetFilter,
         ToggleSelectedTag,
         ToggleSelectedYear,
         ToggleSelectedUser,
@@ -237,6 +238,12 @@ public class ScreenshotrApp : ElmApp<ScreenshotrModel, ScreenshotrApp.MessageTyp
                 }
 
 
+            case MessageType.ResetFilter:
+                {
+                    m = m with { Filter = m.Filter.ResetFilter() };
+                    if (m.ShowSlideshow) m = m with { CurrentSlideshowIndex = 0 };
+                    break;
+                }
             case MessageType.ToggleSelectedTag:
                 {
                     var x = message.GetArgument<string>();
