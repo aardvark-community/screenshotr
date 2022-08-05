@@ -314,7 +314,22 @@ public record Filter(
             var xs = AllScreenshots.All.Values.AsParallel();
 
             if (SelectedTags.Count > 0)
-                xs = xs.Where(x => x.Tags.Any(SelectedTags.Contains));
+            {
+                if (SelectedTags.Contains("!hide"))
+                {
+                    xs = xs.Where(x => x.Tags.Any(SelectedTags.Contains));
+                }
+                else
+                {
+                    xs = xs
+                        .Where(x => !x.Tags.Contains("!hide"))
+                        .Where(x => x.Tags.Any(SelectedTags.Contains));
+                }
+            }
+            else
+            {
+                xs = xs.Where(x => !x.Tags.Contains("!hide"));
+            }
 
             if (SelectedYears.Count > 0)
                 xs = xs.Where(x => SelectedYears.Contains(x.Created.Year));
