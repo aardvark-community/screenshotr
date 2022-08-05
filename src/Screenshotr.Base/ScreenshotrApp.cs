@@ -212,7 +212,7 @@ public class ScreenshotrApp : ElmApp<ScreenshotrModel, ScreenshotrApp.MessageTyp
             case MessageType.SetLiveSearch:
                 {
                     var s = message.GetArgument<string>();
-                    m = m with { Filter = m.Filter with { LiveSearch = s } };
+                    m = m with { Filter = m.Filter.SetLiveSearch(s) };
                     break;
                 }
 

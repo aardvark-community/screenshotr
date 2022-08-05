@@ -8,19 +8,19 @@
             @*<div class="d-flex flex-row justify-content-between">*@
             <div class="d-flex flex-row justify-content-end">
                 @* live search *@
-                @if (false)
+                @if (true)
                 {
                 <div class="flex-fill" 
                     @onkeydown:stopPropagation="true"
                     @onkeypress:stopPropagation="true"
                     @onkeyup:stopPropagation="true"
                     >
-                    <span style="margin-right: 0.3em;">search</span>
+                    @*<span style="margin-right: 0.3em;">search</span>*@
                     <input type="text"
                             class="form-control-xs border-1 border-primary h-75 w-50 d-inline-block"
                             id="myEditTag"
                             @bind-value="LiveSearchString"
-                            @onkeypress="OnKeyPress"
+                            @onkeyup="OnKeyPress"
                             @ref="_searchInputRef" />
                     <button 
                         type="button" class="btn btn-outline-primary border-0 p-0" style="cursor: pointer;" 

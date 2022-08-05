@@ -316,7 +316,9 @@ public record Filter(
             SelectedProcesses = SelectedProcesses.Contains(x) ? SelectedProcesses.Remove(x) : SelectedProcesses.Add(x) 
         })
         .ComputeCache();
-
+    public Filter SetLiveSearch(string x) =>
+        (this with { LiveSearch = x})
+        .ComputeCache();
 
     public Filter UpsertScreenshot(Screenshot screenshot) =>
         (this with { AllScreenshots = AllScreenshots.UpsertScreenshot(screenshot) })
@@ -324,6 +326,9 @@ public record Filter(
 
     private Filter ComputeCache()
     {
+        var liveSearchQuery = LiveSearch?.ToLowerInvariant()?.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        var activeLiveSearchQuery = liveSearchQuery?.Length > 0;
+
 #if PRINT_TIMING
         var debugGuid = Guid.NewGuid();
         var sw = new Stopwatch(); sw.Restart();
@@ -410,6 +415,11 @@ public record Filter(
                 .Where(x => x.count > 0 || SelectedTags.Contains(x.tag))
                 .OrderBy(x => x.tag);
 
+            if (activeLiveSearchQuery)
+            {
+                xs = xs.Where(x => liveSearchQuery.Any(s => x.tag.ToLowerInvariant().Contains(s)));
+            }
+
             _cacheFilteredTags = xs.ToImmutableList();
 
 #if PRINT_TIMING
@@ -429,6 +439,11 @@ public record Filter(
             xs = xs
                 .Where(x => x.count > 0 || SelectedYears.Contains(x.year))
                 .OrderBy(x => x.year);
+
+            if (activeLiveSearchQuery)
+            {
+                xs = xs.Where(x => liveSearchQuery.Any(s => x.year.ToString().Contains(s)));
+            }
 
             _cacheFilteredYears = xs.ToImmutableList();
 
@@ -450,6 +465,11 @@ public record Filter(
                 .Where(x => x.count > 0 || SelectedUsers.Contains(x.user))
                 .OrderBy(x => x.user);
 
+            if (activeLiveSearchQuery)
+            {
+                xs = xs.Where(x => liveSearchQuery.Any(s => x.user.ToLowerInvariant().Contains(s)));
+            }
+
             _cacheFilteredUsers = xs.ToImmutableList();
 
 #if PRINT_TIMING
@@ -470,6 +490,11 @@ public record Filter(
                 .Where(x => x.count > 0 || SelectedHostnames.Contains(x.hostname))
                 .OrderBy(x => x.hostname);
 
+            if (activeLiveSearchQuery)
+            {
+                xs = xs.Where(x => liveSearchQuery.Any(s => x.hostname.ToLowerInvariant().Contains(s)));
+            }
+
             _cacheFilteredHostnames = xs.ToImmutableList();
 
 #if PRINT_TIMING
@@ -489,6 +514,11 @@ public record Filter(
             xs = xs
                 .Where(x => x.count > 0 || SelectedProcesses.Contains(x.process))
                 .OrderBy(x => x.process);
+
+            if (activeLiveSearchQuery)
+            {
+                xs = xs.Where(x => liveSearchQuery.Any(s => x.process.ToLowerInvariant().Contains(s)));
+            }
 
             _cacheFilteredProcesses = xs.ToImmutableList();
 
