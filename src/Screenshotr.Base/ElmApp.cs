@@ -112,18 +112,23 @@ namespace Screenshotr
                 }
                 catch (Exception e)
                 {
+                    Console.Write($"[{t0.Year:0000}-{t0.Month:00}-{t0.Day:00} {t0.Hour:00}:{t0.Minute:00}:{t0.Second:00}.{t0.Millisecond:000}][");
                     Console.BackgroundColor = colorBg;
                     Console.ForegroundColor = colorFg;
-                    Console.WriteLine($"[{t0.Year:0000}-{t0.Month:00}-{t0.Day:00} {t0.Hour:00}:{t0.Minute:00}:{t0.Second:00}.{t0.Millisecond:000}][{instanceId}/{msgId,6}][ERR] {e}");
+                    Console.Write(instanceId);
                     Console.ResetColor();
+                    Console.WriteLine($"/{msgId,6}][ERR] {e}");
                 }
                 finally
                 {
                     var t2 = DateTimeOffset.Now;
+                    Console.Write($"[{t0.Year:0000}-{t0.Month:00}-{t0.Day:00} {t0.Hour:00}:{t0.Minute:00}:{t0.Second:00}.{t0.Millisecond:000}][");
                     Console.BackgroundColor = colorBg;
                     Console.ForegroundColor = colorFg;
-                    Console.WriteLine($"[{t0.Year:0000}-{t0.Month:00}-{t0.Day:00} {t0.Hour:00}:{t0.Minute:00}:{t0.Second:00}.{t0.Millisecond:000}][{instanceId}/{msgId,6}][MSG] {(int)(t1 - t0).TotalMilliseconds,4} ms | {(int)(t2 - t1).TotalMilliseconds,4} ms | {msg}");
+
+                    Console.Write(instanceId);
                     Console.ResetColor();
+                    Console.WriteLine($"/{msgId,6}][MSG] {(int)(t1 - t0).TotalMilliseconds,4} ms | {(int)(t2 - t1).TotalMilliseconds,4} ms | {msg}");
                 }
             }
         });
