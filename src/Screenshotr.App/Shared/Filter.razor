@@ -23,8 +23,9 @@
                             @onkeyup="OnKeyPress"
                             @ref="_searchInputRef" />
                     <button 
-                        type="button" class="btn btn-outline-primary border-0 p-0" style="cursor: pointer;" 
-                        @onclick="() => App.Dispatch(ScreenshotrApp.MessageType.SetLiveSearch, string.Empty)">
+                        type="button" class="btn btn-outline-primary border-0 p-0" style="cursor: pointer;"
+                        @onclick="ClearLiveSearch"
+                        >
                         <i class="bi bi-x"></i>
                     </button>
                 </div>
@@ -169,13 +170,16 @@
 
     async Task OnKeyPress(KeyboardEventArgs args)
     {
-        //if (args.Key == "Enter")
-        {
-            if (_module == null) throw new Exception("Assertion failed. Module is not initialized.");
-            var result = await _module.InvokeAsync<string>("GetInputText", _searchInputRef);
-            LiveSearchString = result;
-            App.Dispatch(ScreenshotrApp.MessageType.SetLiveSearch, result);
-        }
+        if (_module == null) throw new Exception("Assertion failed. Module is not initialized.");
+        var result = await _module.InvokeAsync<string>("GetInputText", _searchInputRef);
+        LiveSearchString = result;
+        App.Dispatch(ScreenshotrApp.MessageType.SetLiveSearch, result);
+    }
+
+    void ClearLiveSearch()
+    {
+        LiveSearchString = string.Empty;
+        App.Dispatch(ScreenshotrApp.MessageType.SetLiveSearch, string.Empty);
     }
 
 	private void Update() => InvokeAsync(this.StateHasChanged);
