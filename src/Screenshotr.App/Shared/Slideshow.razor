@@ -46,7 +46,7 @@
                         <div>
                             <input type="text"
                            class="form-control-xs border-1 border-primary h-75 w-50 d-inline-block"
-                           id="myEditTag"
+                           id="slideshowEditTag"
                            @bind-value="LiveTag"
                            @onkeydown="OnKeyDown"
                            @ref="_newTagInput" />
@@ -194,9 +194,14 @@
             _module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./Shared/Slideshow.razor.js");
         }
 
-        if (_module != null)
+        //if (_module != null)
+        //{
+        //    await _module.InvokeVoidAsync("SetFocusToElement", "mySlideshowContainer");
+        //}
+
+        if (App.Model.ActiveTagEditScreenshotId != null && _module != null)
         {
-            await _module.InvokeVoidAsync("SetFocusToElement", "mySlideshowContainer");
+            await _module.InvokeVoidAsync("SetFocusToElement", "slideshowEditTag");
         }
     }
 
