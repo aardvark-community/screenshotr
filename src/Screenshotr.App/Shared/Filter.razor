@@ -18,7 +18,7 @@
                     @*<span style="margin-right: 0.3em;">search</span>*@
                     <input type="text"
                             class="form-control-xs border-1 border-primary h-75 w-50 d-inline-block"
-                            id="myEditTag"
+                            id="liveSearchTextbox"
                             @bind-value="LiveSearchString"
                             @onkeyup="OnKeyPress"
                             @ref="_searchInputRef" />
@@ -196,7 +196,7 @@
 
         if (App.Model.ActiveTagEditScreenshotId != null && _module != null)
         {
-            await _module.InvokeVoidAsync("SetFocusToElement", "myEditTag");
+            await _module.InvokeVoidAsync("SetFocusToElement", "liveSearchTextbox");
         }
     }
 }
