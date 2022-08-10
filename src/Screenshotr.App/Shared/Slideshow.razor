@@ -21,9 +21,10 @@
                 >
             </div>
 
-            <div class="d-flex flex-column" style="width: 100%; height: 20%;">
+            <div class="d-flex flex-column" style="width: 100%; height: 20%;" @onclick:stopPropagation="true">
 
-                <div class="p-2 m-2 d-flex justify-content-center">
+                <div 
+                    class="p-2 m-2 d-flex justify-content-center">
                     @foreach (var tag in GetTagsAndImportInfo(x))
                     {
                         @if (App.Model.Filter.SelectedTags.Contains(tag))
@@ -46,11 +47,11 @@
                     {
                         <div>
                             <input type="text"
-                           class="form-control-xs border-1 border-primary h-75 w-50 d-inline-block"
-                           id="slideshowEditTag"
-                           @bind-value="LiveTag"
-                           @onkeydown="OnKeyDown"
-                           @ref="_newTagInput" />
+                               class="form-control-xs border-1 border-primary h-75 w-50 d-inline-block"
+                               id="slideshowEditTag"
+                               @bind-value="LiveTag"
+                               @onkeydown="OnKeyDown"
+                               @ref="_newTagInput" />
                             <button type="button" class="btn btn-outline-primary border-0 p-0" style="cursor: pointer;" @onclick="EditTagSubmit">
                                 <i class="bi bi-check2"></i>
                             </button>
@@ -68,7 +69,8 @@
 
                 </div>
 
-                <div class="p-2 m-2 d-flex justify-content-center">
+                <div 
+                    class="p-2 m-2 d-flex justify-content-center">
                     <div class="badge bg-light text-dark" style="margin-right: 1em;">
                         @FormatTimestamp(x.Created)
                     </div>
@@ -212,11 +214,6 @@
         {
             _module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./Shared/Slideshow.razor.js");
         }
-
-        //if (_module != null)
-        //{
-        //    await _module.InvokeVoidAsync("SetFocusToElement", "mySlideshowContainer");
-        //}
 
         if (App.Model.ActiveTagEditScreenshotId != null && _module != null)
         {

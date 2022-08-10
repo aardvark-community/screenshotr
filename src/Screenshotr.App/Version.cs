@@ -2,6 +2,6 @@
 {
     public static class Global
     {
-        public const string AppVersion = "1.0.6";
+        public const string AppVersion = "1.0.7";
     }
 }
