@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -23,6 +20,10 @@ public record ApiGetScreenshotResponse(Screenshot Screenshot);
 public record ApiGetScreenshotsSegmentedRequest(int Skip, int Take);
 public record ApiGetScreenshotsSegmentedResponse(IEnumerable<Screenshot> Screenshots, int Offset, int Count);
 
+public record TagInfo(string Tag, int Count, DateTimeOffset FirstUse, DateTimeOffset LastUse);
+public record ApiGetTagsRequest();
+public record ApiGetTagsResponse(IEnumerable<TagInfo> Items);
+
 public record ApiCreateApiKeyRequest(string Description, IEnumerable<string> Roles, DateTimeOffset ValidUntil);
 public record ApiCreateApiKeyResponse(ApiKey ApiKey);
 
@@ -37,8 +38,9 @@ public interface IScreenshotrApi
     Task<ApiGetStatusResponse>                  GetStatus               (ApiGetStatusRequest request                );
     Task<ApiImportScreenshotResponse>           ImportScreenshot        (ApiImportScreenshotRequest request         );
     Task<ApiUpdateScreenshotResponse>           UpdateScreenshot        (ApiUpdateScreenshotRequest request         );
-    Task<ApiGetScreenshotsSegmentedResponse>    GetScreenshotsSegmented (ApiGetScreenshotsSegmentedRequest request  );
     Task<ApiGetScreenshotResponse>              GetScreenshot           (ApiGetScreenshotRequest request            );
+    Task<ApiGetScreenshotsSegmentedResponse>    GetScreenshotsSegmented (ApiGetScreenshotsSegmentedRequest request  );
+    Task<ApiGetTagsResponse>                    GetTags                 (ApiGetTagsRequest request                  );
     Task<ApiCreateApiKeyResponse>               CreateApiKey            (ApiCreateApiKeyRequest request             );
     Task<ApiDeleteApiKeyResponse>               DeleteApiKey            (ApiDeleteApiKeyRequest request             );
     Task<ApiListApiKeysResponse>                ListApiKeys             (ApiListApiKeysRequest request              );
@@ -66,14 +68,17 @@ public static class IScreenshotrApiExtensions
             Timestamp: timestamp ?? DateTimeOffset.Now
             ));
  
-    public static Task<ApiUpdateScreenshotResponse> UpdateScreenshot(this IScreenshotrApi self, Screenshot updatedScreenshot)
-        => self.UpdateScreenshot(new(updatedScreenshot));
+    public static Task<ApiGetScreenshotResponse> GetScreenshot(this IScreenshotrApi self, string id)
+        => self.GetScreenshot(new(id));
 
     public static Task<ApiGetScreenshotsSegmentedResponse> GetScreenshotsSegmented(this IScreenshotrApi self, int skip, int take)
         => self.GetScreenshotsSegmented(new(Skip: skip, Take: take));
 
-    public static Task<ApiGetScreenshotResponse> GetScreenshot(this IScreenshotrApi self, string id)
-        => self.GetScreenshot(new(id));
+    public static Task<ApiUpdateScreenshotResponse> UpdateScreenshot(this IScreenshotrApi self, Screenshot updatedScreenshot)
+        => self.UpdateScreenshot(new(updatedScreenshot));
+
+    public static Task<ApiGetTagsResponse> GetTags(this IScreenshotrApi self)
+        => self.GetTags(new());
 
     public static Task<ApiCreateApiKeyResponse> CreateApiKey(this IScreenshotrApi self, string description, IReadOnlyList<string> roles, DateTimeOffset validUntil)
         => self.CreateApiKey(new(description, roles, validUntil));

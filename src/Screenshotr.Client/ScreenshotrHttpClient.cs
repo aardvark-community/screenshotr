@@ -1,8 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
 using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -97,10 +94,11 @@ public class ScreenshotrHttpClient : IScreenshotrApi
     };
 
     public Task<ApiGetStatusResponse              > GetStatus               (ApiGetStatusRequest request              ) => Call<ApiGetStatusResponse              > (request, Global.ApiPathStatus            );
-    public Task<ApiGetScreenshotsSegmentedResponse> GetScreenshotsSegmented (ApiGetScreenshotsSegmentedRequest request) => Call<ApiGetScreenshotsSegmentedResponse> (request, Global.ApiPathScreenshotsSegment);
     public Task<ApiImportScreenshotResponse       > ImportScreenshot        (ApiImportScreenshotRequest request       ) => Call<ApiImportScreenshotResponse       > (request, Global.ApiPathScreenshotsImport );
-    public Task<ApiUpdateScreenshotResponse       > UpdateScreenshot        (ApiUpdateScreenshotRequest request       ) => Call<ApiUpdateScreenshotResponse       > (request, Global.ApiPathScreenshotsUpdate );
     public Task<ApiGetScreenshotResponse          > GetScreenshot           (ApiGetScreenshotRequest request          ) => Call<ApiGetScreenshotResponse          > (request, Global.ApiPathScreenshotsGet    );
+    public Task<ApiGetScreenshotsSegmentedResponse> GetScreenshotsSegmented (ApiGetScreenshotsSegmentedRequest request) => Call<ApiGetScreenshotsSegmentedResponse> (request, Global.ApiPathScreenshotsSegment);
+    public Task<ApiUpdateScreenshotResponse       > UpdateScreenshot        (ApiUpdateScreenshotRequest request       ) => Call<ApiUpdateScreenshotResponse       > (request, Global.ApiPathScreenshotsUpdate );
+    public Task<ApiGetTagsResponse                > GetTags                 (ApiGetTagsRequest request                ) => Call<ApiGetTagsResponse                > (request, Global.ApiPathScreenshotsGetTags);
     public Task<ApiCreateApiKeyResponse           > CreateApiKey            (ApiCreateApiKeyRequest request           ) => Call<ApiCreateApiKeyResponse           > (request, Global.ApiPathApiKeysGenerate   );
     public Task<ApiDeleteApiKeyResponse           > DeleteApiKey            (ApiDeleteApiKeyRequest request           ) => Call<ApiDeleteApiKeyResponse           > (request, Global.ApiPathApiKeysDelete     );
     public Task<ApiListApiKeysResponse            > ListApiKeys             (ApiListApiKeysRequest request            ) => Call<ApiListApiKeysResponse            > (request, Global.ApiPathApiKeysList       );

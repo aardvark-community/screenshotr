@@ -2,7 +2,7 @@
   "profiles": {
     "screenshotr": {
       "commandName": "Project",
-      "commandLineArgs": "apikeys list -k 2b13289a309514c05cbe54f1259f2c49330e5fd5efee223a4957c7816fa7c874"
+      "commandLineArgs": "tags -e http://localhost:5020 -k 0000000000000000000000000000000000000000000000000000000000000000"
     }
   }
 }

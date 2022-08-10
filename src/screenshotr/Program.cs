@@ -3,9 +3,7 @@
  */
 
 using Microsoft.Extensions.Configuration;
-using Screenshotr;
 using SixLabors.ImageSharp;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
@@ -86,6 +84,7 @@ try
     {
         case "import"    : await Import    (args.Tail()); break;
         case "list"      : await List      (args.Tail()); break;
+        case "tags"      : await Tags      (args.Tail()); break;
         case "tail"      : await Tail      (args.Tail()); break;
         case "apikeys"   : await ApiKeys   (args.Tail()); break;
         case "connect"   : await Connect   (args.Tail()); break;
@@ -119,6 +118,7 @@ $@"Usage:
   Commands:
     import [-t <tags>] <file|folder>* [-x <exclude>] [--addRandomLabels]
     list [--skip <int>] [--take <int>]
+    tags
     tail
     apikeys
       create -d <description> [-r <role>]+ [--days <float>]
@@ -133,6 +133,7 @@ $@"Usage:
     screenshotr disconnect
     screenshotr import -t ""mytag some-other-tag"" img.jpg /data/pictures/
     screenshotr list --skip 10 --take 5
+    screenshotr gettags
     screenshotr tail
     screenshotr apikeys create -d ""alice's import key"" -r ""{Roles.Importer}""
     screenshotr apikeys delete ""2442d075d2f3888...""
@@ -173,7 +174,6 @@ async Task ApiKeys(string[] args)
         default: Usage(); break;
     }
 }
-
 async Task ApiKeysCreate(string[] args)
 {
     var description = "";
@@ -226,46 +226,6 @@ async Task ApiKeysList(string[] args)
 
     var reply = await repo.ListApiKeys(skip: skip, take: take);
     foreach (var x in reply.ApiKeys)
-    {
-        WriteLine(JsonSerializer.Serialize(x, Utils.JsonOptions));
-    }
-}
-
-Task Tail(string[] args)
-{
-    if (args.Length > 0) { Usage(); return Task.CompletedTask; }
-
-    repo.OnScreenshotAdded += screenshot =>
-    {
-        WriteLine($"[ScreenshotAdded  ] {screenshot.Id}");
-    };
-
-    repo.OnScreenshotUpdated += screenshot =>
-    {
-        WriteLine($"[ScreenshotUpdated] {screenshot.Id}");
-    };
-
-    ReadLine();
-    return Task.CompletedTask;
-}
-
-async Task List(string[] args)
-{
-    var skip = 0;
-    var take = int.MaxValue;
-
-    for (var i = 0; i < args.Length; i++)
-    {
-        switch (args[i].ToLower())
-        {
-            case "--skip": skip = int.Parse(args[++i]); break;
-            case "--take": take = int.Parse(args[++i]); break;
-            default: { Usage(); return; }
-        }
-    }
-
-    var reply = await repo.GetScreenshotsSegmented(skip: skip, take: take);
-    foreach (var x in reply.Screenshots)
     {
         WriteLine(JsonSerializer.Serialize(x, Utils.JsonOptions));
     }
@@ -416,4 +376,52 @@ async Task Import(string[] args)
     PrintStatsLine("");
     WriteLine($"\r\nfinished at {t1}");
     WriteLine($"{dt.TotalSeconds:N0} seconds");
+}
+
+async Task List(string[] args)
+{
+    var skip = 0;
+    var take = int.MaxValue;
+
+    for (var i = 0; i < args.Length; i++)
+    {
+        switch (args[i].ToLower())
+        {
+            case "--skip": skip = int.Parse(args[++i]); break;
+            case "--take": take = int.Parse(args[++i]); break;
+            default: { Usage(); return; }
+        }
+    }
+
+    var reply = await repo.GetScreenshotsSegmented(skip: skip, take: take);
+    foreach (var x in reply.Screenshots)
+    {
+        WriteLine(JsonSerializer.Serialize(x, Utils.JsonOptions));
+    }
+}
+
+async Task Tags(string[] args)
+{
+    if (args.Length > 0) { Usage(); return; }
+
+    var reply = await repo.GetTags();
+    WriteLine(JsonSerializer.Serialize(reply.Items, Utils.JsonOptions));
+}
+
+Task Tail(string[] args)
+{
+    if (args.Length > 0) { Usage(); return Task.CompletedTask; }
+
+    repo.OnScreenshotAdded += screenshot =>
+    {
+        WriteLine($"[ScreenshotAdded  ] {screenshot.Id}");
+    };
+
+    repo.OnScreenshotUpdated += screenshot =>
+    {
+        WriteLine($"[ScreenshotUpdated] {screenshot.Id}");
+    };
+
+    ReadLine();
+    return Task.CompletedTask;
 }

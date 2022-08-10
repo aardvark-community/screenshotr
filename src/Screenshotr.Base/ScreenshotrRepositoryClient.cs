@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Diagnostics;
 
 namespace Screenshotr;
 
@@ -36,6 +37,25 @@ public class ScreenshotrRepositoryClient : IScreenshotrApi
         return Task.FromResult(result);
     }
 
+    public async Task<ApiImportScreenshotResponse> ImportScreenshot(ApiImportScreenshotRequest request)
+    {
+        (_repo, var screenshot, var isDuplicate) = await _repo.ImportScreenshot(
+            request.Buffer,
+            timestamp: request.Timestamp,
+            tags: request.Tags,
+            custom: request.Custom,
+            importInfo: request.ImportInfo
+            );
+
+        if (screenshot == null) throw new Exception("Import failed.");
+        OnScreenshotAdded?.Invoke(screenshot);
+        OnChange?.Invoke();
+        return new(screenshot, isDuplicate);
+    }
+
+    public Task<ApiGetScreenshotResponse> GetScreenshot(ApiGetScreenshotRequest request)
+        => Task.FromResult(new ApiGetScreenshotResponse(_repo.Entries[request.Id]));
+
     public Task<ApiGetScreenshotsSegmentedResponse> GetScreenshotsSegmented(ApiGetScreenshotsSegmentedRequest request)
     {
         ApiGetScreenshotsSegmentedResponse result;
@@ -59,22 +79,6 @@ public class ScreenshotrRepositoryClient : IScreenshotrApi
         return Task.FromResult(result);
     }
 
-    public async Task<ApiImportScreenshotResponse> ImportScreenshot(ApiImportScreenshotRequest request)
-    {
-        (_repo, var screenshot, var isDuplicate) = await _repo.ImportScreenshot(
-            request.Buffer, 
-            timestamp: request.Timestamp, 
-            tags: request.Tags, 
-            custom: request.Custom, 
-            importInfo: request.ImportInfo
-            );
-
-        if (screenshot == null) throw new Exception("Import failed.");
-        OnScreenshotAdded?.Invoke(screenshot);
-        OnChange?.Invoke();
-        return new(screenshot, isDuplicate);
-    }
-
     public async Task<ApiUpdateScreenshotResponse> UpdateScreenshot(ApiUpdateScreenshotRequest request)
     {
         ApiUpdateScreenshotResponse result;
@@ -93,8 +97,33 @@ public class ScreenshotrRepositoryClient : IScreenshotrApi
         return result;
     }
 
-    public Task<ApiGetScreenshotResponse> GetScreenshot(ApiGetScreenshotRequest request)
-        => Task.FromResult(new ApiGetScreenshotResponse(_repo.Entries[request.Id]));
+    public Task<ApiGetTagsResponse> GetTags(ApiGetTagsRequest request)
+    {
+        Console.Write("gettags ... ");
+        var sw = new Stopwatch();
+        sw.Restart();
+
+        var items = _repo.Entries.Values
+            .AsParallel()
+            .SelectMany(x => x.Tags.Select(t => ValueTuple.Create(t, x.Created)))
+            .GroupBy(x => x.Item1)
+            .Select(g => new TagInfo(
+                Tag: g.Key,
+                Count: g.Count(),
+                FirstUse: g.Min(x => x.Item2),
+                LastUse: g.Max(x => x.Item2)
+                ))
+            .ToList()
+            ;
+
+        sw.Stop();
+        Console.WriteLine(sw.Elapsed);
+
+        var result = new ApiGetTagsResponse(items);
+        return Task.FromResult(result);
+    }
+
+    #region apikeys
 
     public Task<ApiCreateApiKeyResponse> CreateApiKey(ApiCreateApiKeyRequest request)
     {
@@ -150,4 +179,6 @@ public class ScreenshotrRepositoryClient : IScreenshotrApi
     }
 
     #endregion
+
+    #endregion // IScreenshotrApi
 }
