@@ -1,3 +1,6 @@
+### 1.5.0
+- API: GetTags
+
 ### 1.4.0
 - renamed type Screenshotr.V2i to Screenshotr.ImgSize to avoid name clashes
 
