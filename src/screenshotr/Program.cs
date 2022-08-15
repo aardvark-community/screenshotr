@@ -65,7 +65,6 @@ IScreenshotrApi repo = endpoint.IsFile
     : await ScreenshotrHttpClient.Connect(endpoint.AbsoluteUri, apikey)
     ;
 
-
 try
 {
     if (args.Contains("--version"))
@@ -133,7 +132,7 @@ $@"Usage:
     screenshotr disconnect
     screenshotr import -t ""mytag some-other-tag"" img.jpg /data/pictures/
     screenshotr list --skip 10 --take 5
-    screenshotr gettags
+    screenshotr tags
     screenshotr tail
     screenshotr apikeys create -d ""alice's import key"" -r ""{Roles.Importer}""
     screenshotr apikeys delete ""2442d075d2f3888...""
