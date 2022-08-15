@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 Console.WriteLine($"[ScreenshotrService] init ...");
 
-var screenshotrBaseDir = builder.Configuration["Screenshotr:Data"];
+var screenshotrBaseDir = builder.Configuration["Screenshotr:Data"] ?? "./data";
 var corsOrigins = builder.Configuration["Screenshotr:CorsOrigins"];
 var enableHttpLogging = bool.TryParse(builder.Configuration["Screenshotr:EnableHttpLogging"], out var x) && x;
 ScreenshotrApp.HttpHeaderUserId = builder.Configuration["Screenshotr:HttpHeaderUserId"];

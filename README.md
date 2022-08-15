@@ -68,7 +68,8 @@ Usage:
   Commands:
     import [-t <tags>] <file|folder>* [-x <exclude>] [--addRandomLabels]
     list [--skip <int>] [--take <int>]
-    tail
+    tags
+    tail [-v|--verbose]
     apikeys
       create -d <description> [-r <role>]+ [--days <float>]
              Available roles are: admin, importer
@@ -78,17 +79,35 @@ Usage:
     disconnect
 
   Examples:
-    screenshotr connect -e "http://localhost" -k "7d10785f41e8..."
+    screenshotr connect -e "https://localhost" -k "7d10785f41e8..."
     screenshotr disconnect
     screenshotr import -t "mytag some-other-tag" img.jpg /data/pictures/
     screenshotr list --skip 10 --take 5
-    screenshotr tail
+    screenshotr tags
+    screenshotr tail -v
     screenshotr apikeys create -d "alice's import key" -r "importer"
     screenshotr apikeys delete "2442d075d2f3888..."
     screenshotr apikeys list
 ```
 
+# Config
 
+## Data directory
+By default, the screenshotr server will store all data in `./data`.
+You can set a custom directory by setting the `Screenshotr:Data` environment variable, e.g.
+```
+set Screenshotr:Data=/my/screenshots/data/dir
+```
+
+## User Name (from reverse proxy)
+Specify the env variable `Screenshotr:HttpHeaderDisplayName=<HTTP-HEADER-NAME>` to extract and display the current user's name from an HTTP header.
+
+This can be used, if you run a reverse proxy sending the current user's display name along with the requests. 
+
+E.g. if your reverse proxy adds an HTTP header named `X-Display-Name`, then you would specify
+```
+set Screenshotr:HttpHeaderDisplayName=X-Display-Name
+```
 
 # Docker
 
