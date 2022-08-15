@@ -118,7 +118,7 @@ $@"Usage:
     import [-t <tags>] <file|folder>* [-x <exclude>] [--addRandomLabels]
     list [--skip <int>] [--take <int>]
     tags
-    tail
+    tail [-v|--verbose]
     apikeys
       create -d <description> [-r <role>]+ [--days <float>]
              Available roles are: {Roles.Admin}, {Roles.Importer}
@@ -133,7 +133,7 @@ $@"Usage:
     screenshotr import -t ""mytag some-other-tag"" img.jpg /data/pictures/
     screenshotr list --skip 10 --take 5
     screenshotr tags
-    screenshotr tail
+    screenshotr tail -v
     screenshotr apikeys create -d ""alice's import key"" -r ""{Roles.Importer}""
     screenshotr apikeys delete ""2442d075d2f3888...""
     screenshotr apikeys list");
@@ -409,17 +409,27 @@ async Task Tags(string[] args)
 
 Task Tail(string[] args)
 {
-    if (args.Length > 0) { Usage(); return Task.CompletedTask; }
+    var verbose = false;
 
-    repo.OnScreenshotAdded += screenshot =>
+    for (var i = 0; i < args.Length; i++)
     {
-        WriteLine($"[ScreenshotAdded  ] {screenshot.Id}");
-    };
+        switch (args[i].ToLower())
+        {
+            case "-v": case "--verbose": verbose = true; break;
+            default: { Usage(); return Task.CompletedTask; }
+        }
+    }
 
-    repo.OnScreenshotUpdated += screenshot =>
+    if (verbose)
     {
-        WriteLine($"[ScreenshotUpdated] {screenshot.Id}");
-    };
+        repo.OnScreenshotAdded   += screenshot => WriteLine($"[ScreenshotAdded  ] {screenshot.ToJson()}");
+        repo.OnScreenshotUpdated += screenshot => WriteLine($"[ScreenshotUpdated] {screenshot.ToJson()}");
+    }
+    else
+    {
+        repo.OnScreenshotAdded   += screenshot => WriteLine($"[ScreenshotAdded  ] {screenshot.Id}");
+        repo.OnScreenshotUpdated += screenshot => WriteLine($"[ScreenshotUpdated] {screenshot.Id}");
+    }
 
     ReadLine();
     return Task.CompletedTask;

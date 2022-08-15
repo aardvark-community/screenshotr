@@ -2,7 +2,7 @@
   "profiles": {
     "screenshotr": {
       "commandName": "Project",
-      "commandLineArgs": "tags -e http://localhost:5020 -k 0000000000000000000000000000000000000000000000000000000000000000"
+      "commandLineArgs": "tail -v -e http://localhost:5020 -k 0000000000000000000000000000000000000000000000000000000000000000"
     }
   }
 }
