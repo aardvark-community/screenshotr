@@ -19,34 +19,37 @@ public class ScreenshotrHttpClient : IScreenshotrApi
         _bearer = string.IsNullOrWhiteSpace(apikey) ? null : $"Bearer {apikey}";
     }
 
-    public static async Task<ScreenshotrHttpClient> Connect(string endpoint, string apikey)
+    public static Task<ScreenshotrHttpClient> Connect(string endpoint, string apikey)
     {
         var client = new ScreenshotrHttpClient(endpoint, apikey);
 
-        var connection = new HubConnectionBuilder()
-            .WithUrl(client._httpClient.BaseAddress.AbsoluteUri + "screenshotrhub")
-            .Build();
-
-        connection.Closed += async (error) =>
+        _ = Task.Run(async () =>
         {
-            await Task.Delay(new Random().Next(0, 5) * 1000);
-            await connection.StartAsync();
-        };
+            var connection = new HubConnectionBuilder()
+                .WithUrl(client._httpClient.BaseAddress.AbsoluteUri + "screenshotrhub")
+                .Build();
 
-        connection.On<Screenshot>("ScreenshotAdded", screenshot => client.OnScreenshotAdded?.Invoke(screenshot));
-        connection.On<Screenshot>("ScreenshotUpdated", screenshot => client.OnScreenshotUpdated?.Invoke(screenshot));
+            connection.Closed += async (error) =>
+            {
+                await Task.Delay(new Random().Next(0, 5) * 1000);
+                await connection.StartAsync();
+            };
 
-        try
-        {
-            await connection.StartAsync();
-            //Console.WriteLine("[SignalR] Connection started");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[SignalR] {ex.Message}");
-        }
+            connection.On<Screenshot>("ScreenshotAdded", screenshot => client.OnScreenshotAdded?.Invoke(screenshot));
+            connection.On<Screenshot>("ScreenshotUpdated", screenshot => client.OnScreenshotUpdated?.Invoke(screenshot));
 
-        return client;
+            try
+            {
+                await connection.StartAsync();
+                //Console.WriteLine("[SignalR] Connection started");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[SignalR] {ex.Message}");
+            }
+        });
+
+        return Task.FromResult(client);
     }
 
     private async Task<T> Call<T>(object request, string path)
