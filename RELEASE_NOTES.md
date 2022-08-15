@@ -1,3 +1,8 @@
+### 1.5.1
+- fix usage message
+- add "screenshotr tail [-v|--verbose]", which prints complete screenshot json (only screenhot id is printed without -v)
+- lazy initialization of ScreenshotrHttpClient's websocket connection (in order to speed up first query)
+
 ### 1.5.0
 - API: GetTags
 
