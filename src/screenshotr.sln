@@ -18,13 +18,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_", "_", "{C92E1FE9-37F3-4B
 		..\.gitignore = ..\.gitignore
 		..\build.cmd = ..\build.cmd
 		..\build.sh = ..\build.sh
+		..\docker-compose.traefik-example.yml = ..\docker-compose.traefik-example.yml
+		..\docker-compose.yml = ..\docker-compose.yml
+		..\Dockerfile = ..\Dockerfile
 		..\LICENSE = ..\LICENSE
 		..\paket.dependencies = ..\paket.dependencies
 		..\paket.lock = ..\paket.lock
 		..\README.md = ..\README.md
 		..\RELEASE_NOTES.md = ..\RELEASE_NOTES.md
 		..\run.bat = ..\run.bat
+		..\run.sh = ..\run.sh
 		..\screenshotr.cmd = ..\screenshotr.cmd
+		..\screenshotr.sh = ..\screenshotr.sh
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Screenshotr.Client", "Screenshotr.Client\Screenshotr.Client.csproj", "{E0E29781-7C86-4640-AD08-9BB42AE6DE9B}"

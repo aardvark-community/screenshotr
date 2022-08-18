@@ -1,5 +1,6 @@
 ﻿using FFMpegCore;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
@@ -9,6 +10,7 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text.Json;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace Screenshotr;
 
@@ -168,6 +170,41 @@ public record Repository
                     }
                 case MediaType.Video:
                     {
+                        /*
+                         
+                        (0) TODOs
+                            (a) very large file upload
+                            (b) worker queue for video uploads (thumbnail extractopn resampling, etc)
+                              - will also inject video added messages (instead of http request handler)
+                            (c) 
+
+
+                        https://gist.github.com/dvlden/b9d923cb31775f92fa54eb8c39ccd5a9
+                        https://stackoverflow.com/questions/5287603/how-to-extract-orientation-information-from-videos
+
+                        (1) find out rotation with ffprobe:
+                            
+                            ffprobe C:\Users\kellner\Videos\IMG_3126.MOV
+                                                          ...
+                              Side data:
+                              displaymatrix: rotation of -90.00 degrees
+                              ...
+
+                        (2) extract thumbnail image:
+                              ffmpeg -i inputvideo.mp4 -vframes 1 -vf scale=720:-2 -f image2 thumbnail%d.jpg
+
+                              -vframes: extract 1 image
+                              -vf: scale to 720 width (height will be according to aspect ratio AND divisible by 2)
+                              -f: image2 is the format, really, :-O
+                              outputfilename MUST contain placeholder (%d) for image number
+
+                        (3) convert in default video streaming format for display in webbrowser
+                            
+                            ffmpeg -i inputvideo.mov -vf scale=-2:720 -y output.mp4
+
+                            -y: overwrite output file
+                         */
+
                         if (videoDuration > TimeSpan.FromSeconds(5))
                             videoDuration = TimeSpan.FromSeconds(5);
                         else
