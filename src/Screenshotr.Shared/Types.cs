@@ -113,13 +113,21 @@ public record ApiKeys(IImmutableDictionary<string, ApiKey> Keys)
 
 public record ImgSize(int X, int Y);
 
-public record ImportInfo(string Username, string Hostname, string Process, string OsVersion, string ClrVersion)
+public record ImportInfo(
+    string Username,
+    string Hostname,
+    string Process,
+    string OsVersion,
+    string ClrVersion,
+    string? OriginalFileName
+    )
 {
     public static ImportInfo Now => new(
         Username: Environment.UserName,
         Hostname: Environment.MachineName,
         Process: Path.GetFileName(System.Diagnostics.Process.GetCurrentProcess()?.MainModule?.FileName) ?? "",
         OsVersion: Environment.OSVersion.ToString(),
-        ClrVersion: Environment.Version.ToString()
+        ClrVersion: Environment.Version.ToString(),
+        OriginalFileName: null
         );
 }

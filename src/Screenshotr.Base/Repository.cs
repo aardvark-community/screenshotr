@@ -1,9 +1,12 @@
-﻿using SixLabors.ImageSharp;
+﻿using FFMpegCore;
+using Microsoft.AspNetCore.Components.Forms;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text.Json;
 
@@ -102,9 +105,37 @@ public record Repository
             var id = Convert.ToHexString(SHA1.Create().ComputeHash(buffer)).ToLower();
             if (Entries.ContainsKey(id)) return (this, Entries[id], true);
 
+            var mediaType = MediaType.Unknown;
+            TimeSpan? videoDuration = null;
+
+            ImgSize size;
             var info = Image.Identify(buffer);
-            if (info == null) return (this, null, false);
-            var size = new ImgSize(info.Width, info.Height);
+            if (info == null)
+            {
+                // no image, but could be video
+                var mediaInfo = await FFProbe.AnalyseAsync(new MemoryStream(buffer));
+                Console.WriteLine(mediaInfo.ToJsonString());
+                if (mediaInfo?.PrimaryVideoStream == null)
+                {
+                    return (this, null, false);
+                }
+                else
+                {
+                    // we have VIDEO
+                    size = new ImgSize(
+                        mediaInfo.PrimaryVideoStream.Width,
+                        mediaInfo.PrimaryVideoStream.Height
+                        );
+                    videoDuration = mediaInfo.Duration;
+                    mediaType = MediaType.Video;
+                }
+            }
+            else
+            {
+                // we have IMAGE
+                size = new ImgSize(info.Width, info.Height);
+                mediaType = MediaType.Image;
+            }
 
             var screenshot = new Screenshot(
                 Id: id,
@@ -112,20 +143,55 @@ public record Repository
                 Bytes: buffer.Length,
                 Size: size,
                 Tags: tags.ToImmutableHashSet(),
+                MediaType: mediaType,
                 Custom: custom,
                 importInfo
                 );
 
+            // store original media file
             var pathFullRes = Path.Combine(BaseDirectory, screenshot.RelPathFullRes);
             Directory.CreateDirectory(Path.GetDirectoryName(pathFullRes)!);
             await File.WriteAllBytesAsync(pathFullRes, buffer);
 
+            // store thumbnail
             var pathThumb = Path.Combine(BaseDirectory, screenshot.RelPathThumb);
-            using var img = Image.Load<Rgba32>(buffer);
-            using var thumb = Resize(img, new Size(256, 256));
-            //await thumb.SaveAsJpegAsync(pathThumb, new JpegEncoder() { ColorType = JpegColorType.Rgb, Quality = 80 }); ;
-            await thumb.SaveAsPngAsync(pathThumb, new PngEncoder() { ColorType = PngColorType.RgbWithAlpha });
+            switch (mediaType)
+            {
+                case MediaType.Image:
+                    {
+                        using var img = Image.Load<Rgba32>(buffer);
+                        using var thumb = Resize(img, new Size(256, 256));
+                        //await thumb.SaveAsJpegAsync(pathThumb, new JpegEncoder() { ColorType = JpegColorType.Rgb, Quality = 80 }); ;
+                        await thumb.SaveAsPngAsync(pathThumb, new PngEncoder() { ColorType = PngColorType.RgbWithAlpha });
 
+                        break;
+                    }
+                case MediaType.Video:
+                    {
+                        if (videoDuration > TimeSpan.FromSeconds(5))
+                            videoDuration = TimeSpan.FromSeconds(5);
+                        else
+                            videoDuration = TimeSpan.Zero;
+
+                        var (w,h) = size.X > size.Y
+                            ? (256, (int)(256.0 * size.Y / size.X))
+                            : ((int)(256.0 * size.X / size.Y), 256)
+                            ;
+
+                        FFMpeg.Snapshot(
+                            pathFullRes,
+                            pathThumb, 
+                            new System.Drawing.Size(w, h),
+                            videoDuration
+                            );
+                        break;
+                    }
+
+                default:
+                    throw new Exception($"Unknown media type {mediaType}.");
+            }
+           
+            // store metadata
             var pathMeta = Path.Combine(BaseDirectory, screenshot.RelPathMeta);
             var meta = screenshot.ToJson();
             await File.WriteAllTextAsync(pathMeta, meta);

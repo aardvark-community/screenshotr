@@ -2,7 +2,7 @@
   "profiles": {
     "screenshotr": {
       "commandName": "Project",
-      "commandLineArgs": "tail -v -e http://localhost:5020 -k 0000000000000000000000000000000000000000000000000000000000000000"
+      "commandLineArgs": "-e http://localhost:5020 -k 0000000000000000000000000000000000000000000000000000000000000000 import \"C:\\Users\\kellner\\Videos\\VID_20220707_150851.mp4\""
     }
   }
 }

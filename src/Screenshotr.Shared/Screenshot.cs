@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -39,12 +40,15 @@ public record Custom(ImmutableList<Custom.Entry> Entries)
     }
 }
 
+public enum MediaType { Unknown, Image, Video };
+
 public record Screenshot(
     string Id,
     DateTimeOffset Created,
     long Bytes,
     ImgSize Size,
     ImmutableHashSet<string> Tags,
+    MediaType MediaType,
     Custom Custom,
     ImportInfo ImportInfo
     )
@@ -53,7 +57,14 @@ public record Screenshot(
     public int Year => Created.Year;
 
     [JsonIgnore]
-    public string RelPathFullRes => $"{RelPath}/{Filename}.jpg";
+    public string FileExtension => ImportInfo.OriginalFileName switch
+    {
+        not null => Path.GetExtension(ImportInfo.OriginalFileName),
+        _ => ".jpg"
+    };
+
+    [JsonIgnore]
+    public string RelPathFullRes => $"{RelPath}/{Filename}{FileExtension}";
 
     [JsonIgnore]
     public string RelPathThumb => $"{RelPath}/{Filename}.thumb.png";

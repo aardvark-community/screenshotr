@@ -2,8 +2,13 @@
  * Screenshotr CLI
  */
 
+using FFMpegCore;
+using FFMpegCore.Enums;
+using FFMpegCore.Pipes;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.Extensions.Configuration;
 using SixLabors.ImageSharp;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
@@ -241,7 +246,7 @@ async Task Import(string[] args)
     {
         switch (args[i].ToLower())
         {
-            case "-t": tags.AddRange(Utils.ParseTags(args[++i])); break;
+            case "-t": tags.AddRange(Helpers.ParseTags(args[++i])); break;
             case "-x": excludes.Add(args[++i]); break;
             case "--addrandomlabels": addRandomLabels = true; break;
             default: filesAndFolders.Add(args[i]); break;
@@ -284,7 +289,8 @@ async Task Import(string[] args)
 
             var timestamp = new FileInfo(filename).LastWriteTime;
             var buffer = await File.ReadAllBytesAsync(filename);
-            var res = await repo.ImportScreenshot(buffer, finalTags, Custom.Empty, ImportInfo.Now, timestamp);
+            var importInfo = ImportInfo.Now with { OriginalFileName = filename };
+            var res = await repo.ImportScreenshot(buffer, finalTags, Custom.Empty, importInfo, timestamp);
             if (res.Screenshot != null)
             {
                 if (res.IsDuplicate) countDuplicate++; else countSuccess++;
@@ -312,14 +318,26 @@ async Task Import(string[] args)
         {
             try
             {
-                var info = Image.Identify(filename);
+                var info = Image.Identify(filename, out var format);
                 if (info != null)
                 {
+                    //WriteLine(info.ToJsonString());
+                    //WriteLine(format.ToJsonString());
                     await ImportFile(filename);
                 }
                 else
                 {
-                    countNoImageFile++;
+                    // no image, but could be video
+                    var mediaInfo = await FFProbe.AnalyseAsync(filename);
+                    if (mediaInfo != null)
+                    {
+                        //WriteLine(mediaInfo.ToJsonString());
+                        await ImportFile(filename);
+                    }
+                    else
+                    {
+                        countNoImageFile++;
+                    }
                 }
             }
             catch
