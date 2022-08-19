@@ -111,7 +111,11 @@ public record ApiKeys(IImmutableDictionary<string, ApiKey> Keys)
     }
 }
 
-public record ImgSize(int X, int Y);
+public record ImgSize(int X, int Y)
+{
+    public static readonly ImgSize Unknown = new(-1, -1);
+    public bool IsUnknown => X == -1 && Y == -1;
+}
 
 public record ImportInfo(
     string Username,

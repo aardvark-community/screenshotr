@@ -26,7 +26,7 @@ foreach (var fn in testfiles)
 
     if (isVideo)
     {
-        var info = VideoUtils.GetVideoInfo(fn);
+        //var info = VideoUtils.GetVideoInfo(fn);
 
         sw.Restart(); Write("converting video ... ");
         VideoUtils.Convert(fn, fn + ".converted.mp4", maxSize: 1280);

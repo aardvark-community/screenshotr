@@ -1,5 +1,4 @@
-﻿using FFMpegCore;
-using Microsoft.AspNetCore.Components.Forms;
+﻿using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
@@ -107,45 +106,13 @@ public record Repository
             var id = Convert.ToHexString(SHA1.Create().ComputeHash(buffer)).ToLower();
             if (Entries.ContainsKey(id)) return (this, Entries[id], true);
 
-            var mediaType = MediaType.Unknown;
-            TimeSpan? videoDuration = null;
-
-            ImgSize size;
-            var info = Image.Identify(buffer);
-            if (info == null)
-            {
-                // no image, but could be video
-                var mediaInfo = await FFProbe.AnalyseAsync(new MemoryStream(buffer));
-                Console.WriteLine(mediaInfo.ToJsonString());
-                if (mediaInfo?.PrimaryVideoStream == null)
-                {
-                    return (this, null, false);
-                }
-                else
-                {
-                    // we have VIDEO
-                    size = new ImgSize(
-                        mediaInfo.PrimaryVideoStream.Width,
-                        mediaInfo.PrimaryVideoStream.Height
-                        );
-                    videoDuration = mediaInfo.Duration;
-                    mediaType = MediaType.Video;
-                }
-            }
-            else
-            {
-                // we have IMAGE
-                size = new ImgSize(info.Width, info.Height);
-                mediaType = MediaType.Image;
-            }
-
             var screenshot = new Screenshot(
                 Id: id,
                 Created: timestamp.Value,
                 Bytes: buffer.Length,
-                Size: size,
+                Size: ImgSize.Unknown,
                 Tags: tags.ToImmutableHashSet(),
-                MediaType: mediaType,
+                MediaType: MediaType.Unknown,
                 Custom: custom,
                 importInfo
                 );
@@ -155,13 +122,44 @@ public record Repository
             Directory.CreateDirectory(Path.GetDirectoryName(pathFullRes)!);
             await File.WriteAllBytesAsync(pathFullRes, buffer);
 
+            var info = Image.Identify(pathFullRes);
+            if (info == null)
+            {
+                // no image, but could be video
+                if (!VideoUtils.IsVideo(pathFullRes))
+                {
+                    File.Delete(pathFullRes);
+                    return (this, null, false);
+                }
+                else
+                {
+                    // we have VIDEO
+                    var mediaInfo = VideoUtils.GetVideoInfo(pathFullRes);
+                    var s = mediaInfo.GetSize();
+                    screenshot = screenshot with
+                    {
+                        Size = new ImgSize(s.Width, s.Height),
+                        MediaType = MediaType.Video
+                    };
+                }
+            }
+            else
+            {
+                // we have IMAGE
+                screenshot = screenshot with
+                { 
+                    Size = new ImgSize(info.Width, info.Height),
+                    MediaType = MediaType.Image
+                }; 
+            }
+
             // store thumbnail
             var pathThumb = Path.Combine(BaseDirectory, screenshot.RelPathThumb);
-            switch (mediaType)
+            switch (screenshot.MediaType)
             {
                 case MediaType.Image:
                     {
-                        using var img = Image.Load<Rgba32>(buffer);
+                        using var img = Image.Load<Rgba32>(pathFullRes);
                         using var thumb = Resize(img, new Size(256, 256));
                         //await thumb.SaveAsJpegAsync(pathThumb, new JpegEncoder() { ColorType = JpegColorType.Rgb, Quality = 80 }); ;
                         await thumb.SaveAsPngAsync(pathThumb, new PngEncoder() { ColorType = PngColorType.RgbWithAlpha });
@@ -170,62 +168,22 @@ public record Repository
                     }
                 case MediaType.Video:
                     {
-                        /*
-                         
-                        (0) TODOs
-                            (a) very large file upload
-                            (b) worker queue for video uploads (thumbnail extractopn resampling, etc)
-                              - will also inject video added messages (instead of http request handler)
-                            (c) 
+                        // image thumbnail
+                        VideoUtils.CreateThumbnail(pathFullRes, pathThumb, 256);
+                        
+                        using var img = Image.Load<Rgba32>(pathThumb);
+                        using var thumb = Resize(img, new Size(256, 256));
+                        //await thumb.SaveAsJpegAsync(pathThumb, new JpegEncoder() { ColorType = JpegColorType.Rgb, Quality = 80 }); ;
+                        await thumb.SaveAsPngAsync(pathThumb, new PngEncoder() { ColorType = PngColorType.RgbWithAlpha });
 
+                        // video thumbnail
+                        VideoUtils.Convert(pathFullRes, pathThumb + ".converted.mp4", 1920);
 
-                        https://gist.github.com/dvlden/b9d923cb31775f92fa54eb8c39ccd5a9
-                        https://stackoverflow.com/questions/5287603/how-to-extract-orientation-information-from-videos
-
-                        (1) find out rotation with ffprobe:
-                            
-                            ffprobe C:\Users\kellner\Videos\IMG_3126.MOV
-                                                          ...
-                              Side data:
-                              displaymatrix: rotation of -90.00 degrees
-                              ...
-
-                        (2) extract thumbnail image:
-                              ffmpeg -i inputvideo.mp4 -vframes 1 -vf scale=720:-2 -f image2 thumbnail%d.jpg
-
-                              -vframes: extract 1 image
-                              -vf: scale to 720 width (height will be according to aspect ratio AND divisible by 2)
-                              -f: image2 is the format, really, :-O
-                              outputfilename MUST contain placeholder (%d) for image number
-
-                        (3) convert in default video streaming format for display in webbrowser
-                            
-                            ffmpeg -i inputvideo.mov -vf scale=-2:720 -y output.mp4
-
-                            -y: overwrite output file
-                         */
-
-                        if (videoDuration > TimeSpan.FromSeconds(5))
-                            videoDuration = TimeSpan.FromSeconds(5);
-                        else
-                            videoDuration = TimeSpan.Zero;
-
-                        var (w,h) = size.X > size.Y
-                            ? (256, (int)(256.0 * size.Y / size.X))
-                            : ((int)(256.0 * size.X / size.Y), 256)
-                            ;
-
-                        FFMpeg.Snapshot(
-                            pathFullRes,
-                            pathThumb, 
-                            new System.Drawing.Size(w, h),
-                            videoDuration
-                            );
                         break;
                     }
 
                 default:
-                    throw new Exception($"Unknown media type {mediaType}.");
+                    throw new Exception($"Unknown media type {screenshot.MediaType}.");
             }
            
             // store metadata

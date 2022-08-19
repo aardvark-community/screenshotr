@@ -2,7 +2,6 @@
  * Screenshotr CLI
  */
 
-using FFMpegCore;
 using Microsoft.Extensions.Configuration;
 using SixLabors.ImageSharp;
 using System.Diagnostics.CodeAnalysis;
@@ -324,8 +323,7 @@ async Task Import(string[] args)
                 else
                 {
                     // no image, but could be video
-                    var mediaInfo = await FFProbe.AnalyseAsync(filename);
-                    if (mediaInfo != null)
+                    if (VideoUtils.IsVideo(filename))
                     {
                         //WriteLine(mediaInfo.ToJsonString());
                         await ImportFile(filename);
