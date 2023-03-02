@@ -282,13 +282,29 @@ async Task Import(string[] args)
                 for (var i0 = 0; i0 < count; i0++) finalTags.Add(randomLabels[random.Next(randomLabels.Length)]);
             }
 
-            var timestamp = new FileInfo(filename).LastWriteTime;
-            var buffer = await File.ReadAllBytesAsync(filename);
-            var importInfo = ImportInfo.Now with { OriginalFileName = filename };
-            var res = await repo.ImportScreenshot(buffer, finalTags, Custom.Empty, importInfo, timestamp);
-            if (res.Screenshot != null)
+            var chunkSize = 10000000;
+            var fileInfo = new FileInfo(filename);
+            if (fileInfo.Length > chunkSize)
             {
-                if (res.IsDuplicate) countDuplicate++; else countSuccess++;
+                // json file mit wie vielen und welche chunks schon am server sind
+                // falls der upload abkackt. das wird aber nicht einzeln gemacht sondern 
+                // zB alle 10 chunks damit nicht zu viel traffic entsteht, der server
+                // kümmert sich dabei um gar nix, das passiert alles am client
+                // chunks werden am server in tmp folder gespeichert und wenn >24h vergangen
+                // sind und sie nicht verabreitet wurden, werden sie daraus gelöscht
+                // wir müssen auch noch mitschicken wenn der letzte chunk oben ist und der
+                // server das ding zusammen bauen kann
+            }
+            else
+            {
+                var timestamp = fileInfo.LastWriteTime;
+                var buffer = await File.ReadAllBytesAsync(filename);
+                var importInfo = ImportInfo.Now with { OriginalFileName = filename };
+                var res = await repo.ImportScreenshot(buffer, finalTags, Custom.Empty, importInfo, timestamp);
+                if (res.Screenshot != null)
+                {
+                    if (res.IsDuplicate) countDuplicate++; else countSuccess++;
+                }
             }
         }
         catch (Exception e)
