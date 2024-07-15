@@ -1,3 +1,6 @@
+### 1.5.2
+- removed package dependencies upper version limits
+
 ### 1.5.1
 - fix usage message
 - add "screenshotr tail [-v|--verbose]", which prints complete screenshot json (only screenhot id is printed without -v)
