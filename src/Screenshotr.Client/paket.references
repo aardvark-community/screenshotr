@@ -1,3 +1,4 @@
 Aardvark.Build
 Microsoft.AspNetCore.SignalR.Client
+Microsoft.Bcl.AsyncInterfaces           // Need an explicit reference for some reason
 System.Net.Http.Json

@@ -7,6 +7,7 @@ nuget System.Net.Http.Json                                    >= 8.0.0 lowest_ma
 nuget System.Text.Json                                        >= 8.0.4 lowest_matching: true
 nuget Microsoft.AspNetCore.SignalR.Client                     >= 8.0.0 lowest_matching: true
 nuget Microsoft.AspNetCore.SignalR.Common                     >= 8.0.0 lowest_matching: true
+nuget Microsoft.Bcl.AsyncInterfaces                           >= 8.0.0 lowest_matching: true
 
 nuget SixLabors.ImageSharp                                    ~> 2.1.8
 
