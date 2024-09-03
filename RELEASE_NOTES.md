@@ -1,3 +1,7 @@
+### 1.5.3
+- Updated packages
+- Fixed missing assembly issue with Microsoft.Bcl.AsyncInterfaces
+
 ### 1.5.2
 - removed package dependencies upper version limits
 
