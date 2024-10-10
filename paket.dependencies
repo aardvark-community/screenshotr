@@ -4,7 +4,7 @@ source https://api.nuget.org/v3/index.json
 
 nuget System.Collections.Immutable                            >= 8.0.0 lowest_matching: true
 nuget System.Net.Http.Json                                    >= 8.0.0 lowest_matching: true
-nuget System.Text.Json                                        >= 8.0.4 lowest_matching: true
+nuget System.Text.Json                                        >= 8.0.5 lowest_matching: true
 nuget Microsoft.AspNetCore.SignalR.Client                     >= 8.0.0 lowest_matching: true
 nuget Microsoft.AspNetCore.SignalR.Common                     >= 8.0.0 lowest_matching: true
 nuget Microsoft.Bcl.AsyncInterfaces                           >= 8.0.0 lowest_matching: true
@@ -23,7 +23,7 @@ nuget Microsoft.JSInterop                                     ~> 8.0.0
 nuget System.Configuration.ConfigurationManager               ~> 8.0.0
 
 // BUILD
-nuget Aardvark.Build                                          ~> 1.0.24
+nuget Aardvark.Build                                          ~> 2.0.3
 
 group Test
     framework: auto-detect

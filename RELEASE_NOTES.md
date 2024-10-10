@@ -1,3 +1,5 @@
+- Updated System.Text.Json dependency (CVE-2024-43485)
+
 ### 1.5.3
 - Updated packages
 - Fixed missing assembly issue with Microsoft.Bcl.AsyncInterfaces
