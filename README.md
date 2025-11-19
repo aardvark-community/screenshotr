@@ -1,8 +1,7 @@
+[![Build](https://github.com/aardvark-community/screenshotr/actions/workflows/build.yml/badge.svg)](https://github.com/aardvark-community/screenshotr/actions/workflows/build.yml)
 [![Publish](https://github.com/aardvark-community/screenshotr/actions/workflows/publish.yml/badge.svg)](https://github.com/aardvark-community/screenshotr/actions/workflows/publish.yml)
-[![Windows](https://github.com/aardvark-community/screenshotr/actions/workflows/windows.yml/badge.svg)](https://github.com/aardvark-community/screenshotr/actions/workflows/windows.yml)
-[![Linux](https://github.com/aardvark-community/screenshotr/actions/workflows/linux.yml/badge.svg)](https://github.com/aardvark-community/screenshotr/actions/workflows/linux.yml)
-[![MacOS](https://github.com/aardvark-community/screenshotr/actions/workflows/mac.yml/badge.svg)](https://github.com/aardvark-community/screenshotr/actions/workflows/mac.yml)
-
+[![Nuget](https://img.shields.io/nuget/vpre/screenshotr.shared)](https://www.nuget.org/packages/screenshotr.shared/)
+[![Downloads](https://img.shields.io/nuget/dt/screenshotr.shared)](https://www.nuget.org/packages/screenshotr.shared/)
 
 # Quickstart
 
