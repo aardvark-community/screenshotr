@@ -1,3 +1,4 @@
+### 1.5.4
 - Require Microsoft.AspNetCore.SignalR.Common >= 8.0.32 in Screenshotr.Client (CVE-2026-70159). Deployed ASP.NET Core runtimes must be patched separately.
 - Updated System.Text.Json dependency (CVE-2024-43485)
 
